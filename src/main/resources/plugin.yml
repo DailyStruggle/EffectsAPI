@@ -1,0 +1,7 @@
+name: EffectsAPI
+version: '${project.version}'
+main: io.github.dailystruggle.effectsapi.EffectsAPI
+api-version: 1.13
+authors: [ leaf26 ]
+description: common effects code between some plugins, more easily referenced
+website: https://github.com/DailyStruggle
