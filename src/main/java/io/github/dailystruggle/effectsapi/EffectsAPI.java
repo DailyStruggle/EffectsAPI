@@ -81,12 +81,6 @@ public final class EffectsAPI extends JavaPlugin {
             Bukkit.getPluginManager().registerEvents(fireworkSafetyListener,this);
         }
 
-//        EffectBuilder.initializePermissions("EffectsAPI","FIREWORK", org.bukkit.FireworkEffect.Type.values());
-//        EffectBuilder.initializePermissions("EffectsAPI","NOTE",     org.bukkit.Instrument.values());
-//        EffectBuilder.initializePermissions("EffectsAPI","PARTICLE", org.bukkit.Particle.values());
-//        EffectBuilder.initializePermissions("EffectsAPI","POTION",   org.bukkit.potion.PotionEffectType.values());
-//        EffectBuilder.initializePermissions("EffectsAPI","SOUND",    null);
-
         //todo: set up command and tabcompleter
     }
 
@@ -95,6 +89,4 @@ public final class EffectsAPI extends JavaPlugin {
         // Plugin shutdown logic
         instance = null;
     }
-
-    //todo: function for parsing permission text into effect
 }

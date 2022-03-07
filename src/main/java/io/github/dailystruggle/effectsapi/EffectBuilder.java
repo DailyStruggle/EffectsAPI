@@ -2,16 +2,13 @@ package io.github.dailystruggle.effectsapi;
 
 import io.github.dailystruggle.effectsapi.LocalEffects.*;
 import org.bukkit.Bukkit;
-import org.bukkit.Particle;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
@@ -64,49 +61,52 @@ public class EffectBuilder {
     /**
      * this function just adds permissions to the server to make tabcompletion easier
      * @param permissionPrefix - how the permission starts
-     * @param effectName - what effect to use
-     * @param <T> -  T is presumably an enum class, but potion effects weren't
-     *           this function should attempt T.values to get a string array
      */
-    public static <T> void initializePermissions(String permissionPrefix, String effectName, @Nullable Class<T> enumeration) {
-        if(enumeration == null) {
-            try {
-                Bukkit.getPluginManager().addPermission(new Permission(permissionPrefix + "." + effectName));
-            } catch (NullPointerException | IllegalArgumentException  permissionException) {
-                Bukkit.getLogger().log(Level.WARNING,"[EffectsAPI] - failed to create permission:" + permissionPrefix + "." + effectName);
-            }
-            return;
-        }
-
-        String[] types;
-        try {
-            types = (String[]) enumeration.getMethod("values").invoke(enumeration);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-            return;
-        }
-
+    public static void initializePermissions(String permissionPrefix) {
         List<Permission> permissionList = new ArrayList<>();
-        for (String type : types) {
-            if(type == null) continue;
+        for (Enumeration<String> effectEnum = listEffects(); effectEnum.hasMoreElements();) {
+            String effectName = effectEnum.nextElement();
+            EffectType effect = effectMap.get(effectName);
+            Class<?> enumeration = effect.enumeration;
+
+            if(enumeration == null) {
+                try {
+                    Bukkit.getPluginManager().addPermission(new Permission(permissionPrefix + "." + effectName));
+                } catch (NullPointerException | IllegalArgumentException  permissionException) {
+                    Bukkit.getLogger().log(Level.WARNING,"[EffectsAPI] - failed to create permission:" + permissionPrefix + "." + effectName);
+                }
+                continue;
+            }
+
+            String[] types;
             try {
-                permissionList.add(new Permission(permissionPrefix + "." + effectName + "." + type));
-            } catch (NullPointerException | IllegalArgumentException  permissionException) {
-                Bukkit.getLogger().log(Level.WARNING,"[EffectsAPI] - failed to create permission:" + permissionPrefix + "." + effectName + "." + type);
+                types = (String[]) enumeration.getMethod("values").invoke(enumeration);
+            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                e.printStackTrace();
                 return;
             }
-        }
 
-        for(Permission permission : permissionList) {
-            try {
-                Bukkit.getPluginManager().addPermission(permission);
-            } catch (NullPointerException | IllegalArgumentException permissionException) {
-                Bukkit.getLogger().log(Level.WARNING, "[EffectsAPI] - failed to add permission:" + permission.getName());
-                return;
+            for (String type : types) {
+                if(type == null) continue;
+                try {
+                    permissionList.add(new Permission(permissionPrefix + "." + effectName + "." + type));
+                } catch (NullPointerException | IllegalArgumentException  permissionException) {
+                    Bukkit.getLogger().log(Level.WARNING,"[EffectsAPI] - failed to create permission:" + permissionPrefix + "." + effectName + "." + type);
+                    return;
+                }
             }
-        }
 
-        permissionList.clear();
+            for(Permission permission : permissionList) {
+                try {
+                    Bukkit.getPluginManager().addPermission(permission);
+                } catch (NullPointerException | IllegalArgumentException permissionException) {
+                    Bukkit.getLogger().log(Level.WARNING, "[EffectsAPI] - failed to add permission:" + permission.getName());
+                    return;
+                }
+            }
+
+            permissionList.clear();
+        }
     }
 
     @Nullable
@@ -132,13 +132,68 @@ public class EffectBuilder {
 
     /**
      * @param permissionPrefix - which permissions to check, for contextual effects
-     * @param permissions - set of all permissions, typically from player.getEffectivePermissions() or similar
+     * @param permissions - set of all permissions, typically from player.getEffectivePermissions()
      * @return all effects constructed
      */
-    @Nullable
-    public static List<Effect> buildEffects(String permissionPrefix, Set<PermissionAttachmentInfo> permissions) {
+    public static List<Effect> buildEffects(@NotNull String permissionPrefix, @NotNull Collection<PermissionAttachmentInfo> permissions) {
 
+        List<Effect> res = new ArrayList<>();
 
-        return null;
+        if(!permissionPrefix.endsWith(".")) permissionPrefix += ".";
+
+        for (PermissionAttachmentInfo perm : permissions) {
+            if (!perm.getValue()) continue;
+            String node = perm.getPermission();
+            if(!node.startsWith(permissionPrefix)) continue;
+
+            String[] val = node.replace(permissionPrefix,"").split("\\.");
+
+            EffectType effectType = effectMap.get(val[0]);
+            Effect effect;
+            try {
+                effect = effectType.type.getConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                e.printStackTrace();
+                continue;
+            }
+            effect.setData((Object[]) Arrays.copyOfRange(val,1,val.length));
+            res.add(effect);
+        }
+
+        return res;
+    }
+
+    @NotNull
+    public static List<Effect> buildEffects(@NotNull Collection<Object[]> effects) {
+        List<Effect> res = new ArrayList<>();
+        for(Object[] effectArr : effects) {
+            Effect effect;
+            if (effectArr[0] instanceof Effect) {
+                effect = (Effect) effectArr[0];
+            }
+            else if (effectArr[0] instanceof Class<?> effectClass) { //assuming it extends effect class
+                if(!effectClass.isInstance(Effect.class)) {
+                    throw new IllegalArgumentException("input effect: " + effectArr[0] + " is not an instance of EffectsAPI.Effect");
+                }
+                try {
+                    effect = (Effect) ((Class<?>) effectArr[0]).getConstructor().newInstance();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+            }
+            else {
+                EffectType effectType = effectMap.get(effectArr[0].toString());
+                try {
+                    effect = effectType.type.getConstructor().newInstance();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+            }
+            effect.setData(Arrays.copyOfRange(effectArr,1, effectArr.length));
+            res.add(effect);
+        }
+        return res;
     }
 }
