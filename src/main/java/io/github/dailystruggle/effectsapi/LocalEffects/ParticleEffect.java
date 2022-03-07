@@ -1,5 +1,6 @@
-package io.github.dailystruggle.effectsapi.effects;
+package io.github.dailystruggle.effectsapi.LocalEffects;
 
+import io.github.dailystruggle.effectsapi.Effect;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Entity;
@@ -7,7 +8,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.Objects;
 
-public class ParticleEffect extends Effect{
+public class ParticleEffect extends Effect {
     Particle particle;
     Integer num = 0;
 

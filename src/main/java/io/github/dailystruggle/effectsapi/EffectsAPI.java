@@ -1,11 +1,10 @@
 package io.github.dailystruggle.effectsapi;
 
-import io.github.dailystruggle.effectsapi.effects.*;
+import io.github.dailystruggle.effectsapi.SpigotListeners.FireworkSafetyListener;
 import org.bukkit.Bukkit;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Instrument;
 import org.bukkit.Particle;
-import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
+//reference point for
 public final class EffectsAPI extends JavaPlugin {
     public static EffectsAPI instance = null;
 
@@ -96,55 +96,5 @@ public final class EffectsAPI extends JavaPlugin {
         instance = null;
     }
 
-    /**
-     * @param permPrefix front of permission, e.g. "rtp.effect.teleport"
-     */
-    public void registerAllPermissions(String permPrefix, Plugin caller) {
-        List<Permission> permissionList = new ArrayList<>();
-
-        try {
-            //adding 600+ sounds takes too long at startup, so lets skip that
-            permissionList.add(new Permission(permPrefix + ".sound"));
-
-            //all fireworks
-            for (FireworkEffect.Type type : FireworkEffect.Type.values()) {
-                permissionList.add(new Permission(permPrefix + ".firework." + type.name()));
-            }
-
-            //all instruments
-            for (Instrument instrument : Instrument.values()) {
-                permissionList.add(new Permission(permPrefix + ".note." + instrument.name()));
-            }
-
-            //all particles
-            if(getServerIntVersion() > 8) {
-                for (Particle particle : Particle.values()) {
-                    permissionList.add(new Permission(permPrefix + ".particle." + particle.name()));
-                }
-            }
-
-            //all potions
-            for (PotionEffectType effect : PotionEffectType.values()) {
-                permissionList.add(new Permission(permPrefix + ".potion." + effect.getName()));
-            }
-        }
-        catch (NullPointerException | IllegalArgumentException permissionException) {
-            Bukkit.getLogger().log(Level.WARNING,"[" + caller.getName() + "] - failed to initialize effect permissions. This will not affect gameplay.");
-            return;
-        }
-
-        try {
-            for(Permission permission : permissionList) {
-                Bukkit.getPluginManager().addPermission(permission);
-            }
-        }
-        catch (NullPointerException | IllegalArgumentException  permissionException) {
-            Bukkit.getLogger().log(Level.WARNING,"[" + caller.getName() + "] - failed to initialize effect permissions. This will not affect gameplay.");
-            return;
-        }
-        permissionList.clear();
-    }
-
-    //todo: function for initializing and triggering any effect
     //todo: function for parsing permission text into effect
 }

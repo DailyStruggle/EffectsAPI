@@ -1,33 +1,56 @@
 package io.github.dailystruggle.effectsapi;
 
-import io.github.dailystruggle.effectsapi.effects.*;
+import io.github.dailystruggle.effectsapi.LocalEffects.*;
 import org.bukkit.Bukkit;
+import org.bukkit.Particle;
 import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 //builder class to give and take effects
-//  I did this to centralize effects
+//  I did this to centralize effects. Call this instead of switching on every possible effect
 public class EffectBuilder {
-    //map name to effect type
-    //  this is a runtime solution for effectively a switch statement. I want to be able to add effects.
-    protected static ConcurrentHashMap<String,Class<? extends Effect>> effectMap = new ConcurrentHashMap<>();
-    static {
-        EffectBuilder.effectMap.put("FIREWORK",   io.github.dailystruggle.effectsapi.effects.FireworkEffect.class);
-        EffectBuilder.effectMap.put("NOTE",       NoteEffect.class);
-        EffectBuilder.effectMap.put("PARTICLE",   ParticleEffect.class);
-        EffectBuilder.effectMap.put("POTION",     PotionEffect.class);
-        EffectBuilder.effectMap.put("SOUND",      SoundEffect.class);
+    //store both effect and values enum
+    private static class EffectType {
+        protected Class<? extends Effect> type;
+        protected Class<?> enumeration;
+
+        public EffectType(Class<? extends Effect> type, @Nullable Class<?> enumeration) {
+            this.type = type;
+            this.enumeration = enumeration;
+        }
     }
 
-    public static void addEffect(String effectName, Class<? extends Effect> effectType) {
-        effectMap.putIfAbsent(effectName.toUpperCase(),effectType);
+    //map name to effect type
+    //  this is a runtime solution for effectively a switch statement, to allow addition and removal
+    private static final ConcurrentHashMap<String,EffectType> effectMap = new ConcurrentHashMap<>();
+    static {
+        addEffect("FIREWORK",   FireworkEffect.class,   org.bukkit.FireworkEffect.Type.class);
+        addEffect("NOTE",       NoteEffect.class,       org.bukkit.Instrument.class);
+        addEffect("PARTICLE",   ParticleEffect.class,   org.bukkit.Particle.class);
+        addEffect("POTION",     PotionEffect.class,     org.bukkit.potion.PotionEffectType.class);
+        addEffect("SOUND",      SoundEffect.class,      org.bukkit.Sound.class);
+    }
+
+    // recall list of permissions added for removal on removeEffect
+    // key: effect name
+    // val: permission names
+    private final static ConcurrentHashMap<String, List<String>> initializedPermissions = new ConcurrentHashMap<>();
+
+    public static void addEffect(String effectName, Class<? extends Effect> effect) {
+        addEffect(effectName,effect,null);
+    }
+
+    public static <T> void addEffect(String effectName, Class<? extends Effect> effect, @Nullable Class<T> enumeration) {
+        effectMap.putIfAbsent(effectName.toUpperCase(),new EffectType(effect,enumeration));
     }
 
     public static Enumeration<String> listEffects() {
@@ -38,46 +61,38 @@ public class EffectBuilder {
         effectMap.remove(effectName);
     }
 
-    // recall list of permissions added for removal on removeEffect
-    // key: effect name
-    // val: permission names
-    protected static ConcurrentHashMap<String, List<String>> initializedPermissions = new ConcurrentHashMap<>();
-
-    //T is presumably an enum, but potion effects weren't so...
-    //  this should attempt name(), getName(), and toString() in that order
-    public static <T> void initializePermissions(String permPrefix, String effectName, @Nullable T[] types) {
-        if(types == null) {
+    /**
+     * this function just adds permissions to the server to make tabcompletion easier
+     * @param permissionPrefix - how the permission starts
+     * @param effectName - what effect to use
+     * @param <T> -  T is presumably an enum class, but potion effects weren't
+     *           this function should attempt T.values to get a string array
+     */
+    public static <T> void initializePermissions(String permissionPrefix, String effectName, @Nullable Class<T> enumeration) {
+        if(enumeration == null) {
             try {
-                Bukkit.getPluginManager().addPermission(new Permission(permPrefix + "." + effectName));
+                Bukkit.getPluginManager().addPermission(new Permission(permissionPrefix + "." + effectName));
             } catch (NullPointerException | IllegalArgumentException  permissionException) {
-                Bukkit.getLogger().log(Level.WARNING,"[EffectsAPI] - failed to create permission:" + permPrefix + "." + effectName);
+                Bukkit.getLogger().log(Level.WARNING,"[EffectsAPI] - failed to create permission:" + permissionPrefix + "." + effectName);
             }
             return;
         }
 
+        String[] types;
+        try {
+            types = (String[]) enumeration.getMethod("values").invoke(enumeration);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+            return;
+        }
+
         List<Permission> permissionList = new ArrayList<>();
-        for (T type : types) {
+        for (String type : types) {
             if(type == null) continue;
-
-            String name;
-
-            //attempt type.name()
             try {
-                name = (String) type.getClass().getMethod("name").invoke(type);
-            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {
-                //attempt type.getName()
-                try {
-                    name = (String) type.getClass().getMethod("getName").invoke(type);
-                } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException ignoredAgain) {
-                    //if none of the above, just toString
-                    name = type.toString();
-                }
-            }
-
-            try {
-                permissionList.add(new Permission(permPrefix + "." + effectName + "." + name));
+                permissionList.add(new Permission(permissionPrefix + "." + effectName + "." + type));
             } catch (NullPointerException | IllegalArgumentException  permissionException) {
-                Bukkit.getLogger().log(Level.WARNING,"[EffectsAPI] - failed to create permission:" + permPrefix + "." + effectName + "." + name);
+                Bukkit.getLogger().log(Level.WARNING,"[EffectsAPI] - failed to create permission:" + permissionPrefix + "." + effectName + "." + type);
                 return;
             }
         }
@@ -98,7 +113,7 @@ public class EffectBuilder {
     public static Effect buildEffect(String name) {
         Effect effect;
         try {
-            effect = effectMap.get(name.toUpperCase()).getConstructor().newInstance();
+            effect = effectMap.get(name.toUpperCase()).type.getConstructor().newInstance();
         } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             //todo: figure out how these are triggered and log how to fix them
             e.printStackTrace();
@@ -115,8 +130,15 @@ public class EffectBuilder {
         return effect;
     }
 
+    /**
+     * @param permissionPrefix - which permissions to check, for contextual effects
+     * @param permissions - set of all permissions, typically from player.getEffectivePermissions() or similar
+     * @return all effects constructed
+     */
     @Nullable
-    public static Effect buildEffect(Permission permission) {
+    public static List<Effect> buildEffects(String permissionPrefix, Set<PermissionAttachmentInfo> permissions) {
+
+
         return null;
     }
 }

@@ -1,4 +1,4 @@
-package io.github.dailystruggle.effectsapi;
+package io.github.dailystruggle.effectsapi.SpigotListeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;

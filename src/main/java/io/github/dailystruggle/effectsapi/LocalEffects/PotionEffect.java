@@ -1,11 +1,12 @@
-package io.github.dailystruggle.effectsapi.effects;
+package io.github.dailystruggle.effectsapi.LocalEffects;
 
+import io.github.dailystruggle.effectsapi.Effect;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffectType;
 
-public class PotionEffect extends Effect{
+public class PotionEffect extends Effect {
     PotionEffectType potionEffectType = PotionEffectType.ABSORPTION; //default to a safe type
     Integer duration = 255, amplifier = 1;
     Boolean ambient = false, particles = true, icon = false;

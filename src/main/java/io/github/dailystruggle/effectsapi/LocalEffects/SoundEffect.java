@@ -1,8 +1,7 @@
-package io.github.dailystruggle.effectsapi.effects;
+package io.github.dailystruggle.effectsapi.LocalEffects;
 
-import org.bukkit.Bukkit;
+import io.github.dailystruggle.effectsapi.Effect;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;

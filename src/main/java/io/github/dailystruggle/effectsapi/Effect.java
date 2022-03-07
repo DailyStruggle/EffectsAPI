@@ -1,11 +1,10 @@
-package io.github.dailystruggle.effectsapi.effects;
+package io.github.dailystruggle.effectsapi;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
 
 public abstract class Effect {
-    protected static String name;
     private Object[] data;
 
     //apply parameters
@@ -24,8 +23,8 @@ public abstract class Effect {
      */
     //run effect at that location
     // may search for entities where needed
-    abstract void trigger(Location location, Plugin caller);
+    abstract public void trigger(Location location, Plugin caller);
 
     //run effect on entity or player
-    abstract void trigger(Entity entity, Plugin caller);
+    abstract public void trigger(Entity entity, Plugin caller);
 }

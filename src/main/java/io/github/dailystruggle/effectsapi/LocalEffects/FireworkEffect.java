@@ -1,7 +1,7 @@
-package io.github.dailystruggle.effectsapi.effects;
+package io.github.dailystruggle.effectsapi.LocalEffects;
 
-import io.github.dailystruggle.effectsapi.EffectsAPI;
-import io.github.dailystruggle.effectsapi.FireworkSafetyListener;
+import io.github.dailystruggle.effectsapi.Effect;
+import io.github.dailystruggle.effectsapi.SpigotListeners.FireworkSafetyListener;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;

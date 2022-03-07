@@ -1,6 +1,6 @@
-package io.github.dailystruggle.effectsapi.effects;
+package io.github.dailystruggle.effectsapi.LocalEffects;
 
-import io.github.dailystruggle.effectsapi.EffectsAPI;
+import io.github.dailystruggle.effectsapi.Effect;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class NoteEffect extends Effect{
+public class NoteEffect extends Effect {
     Instrument instrument = Instrument.PIANO;
     Integer tone=0;
 
