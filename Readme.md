@@ -1,4 +1,4 @@
-I was reusing effect code, so this is some centralized code that automates modular effect storage and recall, with a few useful internal effects to start.
+I was reusing permission-based effect code, so this is some centralized code that automates modular effect storage and recall, with a few useful internal effects to start.
 
 This is intended to function either as a standalone plugin or as a shaded dependency.
 
