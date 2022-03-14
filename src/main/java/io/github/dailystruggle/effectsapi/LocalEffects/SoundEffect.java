@@ -7,7 +7,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.EnumMap;
 
 public class SoundEffect extends Effect<SoundTypeNames> {
 
@@ -26,7 +26,7 @@ public class SoundEffect extends Effect<SoundTypeNames> {
 
     @Override
     public void run() {
-        if(target instanceof Player) {
+        if (target instanceof Player) {
             Player player = (Player) target;
             Location location = player.getLocation().add(
                     (Double) data.get(SoundTypeNames.DX),
@@ -36,9 +36,9 @@ public class SoundEffect extends Effect<SoundTypeNames> {
                     (Sound) data.get(SoundTypeNames.TYPE),
                     (Float) data.get(SoundTypeNames.VOLUME),
                     (Float) data.get(SoundTypeNames.PITCH)
-                    );
+            );
         } else {
-            if(target instanceof Entity) target = ((Entity) target).getLocation();
+            if (target instanceof Entity) target = ((Entity) target).getLocation();
         }
     }
 }

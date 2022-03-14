@@ -38,20 +38,20 @@ public class SoundCommand extends GenericEffectCommand<SoundEffect> {
             String name = entry.getKey().toLowerCase();
             SoundTypeNames enumLookup = SoundTypeNames.valueOf(name.toUpperCase());
             String value = entry.getValue().get(0);
-            data.put(enumLookup,value);
+            data.put(enumLookup, value);
             mainEffect.setData(data);
             while (effects.size() < vals.size()) {
-                effects.add((SoundEffect) mainEffect.clone());
+                effects.add(new SoundEffect());
             }
-            for(int i = 1; i < vals.size(); i++) {
+            for (int i = 1; i < vals.size(); i++) {
                 SoundEffect effect = effects.get(i);
                 enumLookup = SoundTypeNames.valueOf(name.toUpperCase());
                 value = entry.getValue().get(i);
-                data.put(enumLookup,value);
+                data.put(enumLookup, value);
                 effect.setData(data);
             }
         }
-        for(SoundEffect effect : effects) {
+        for (SoundEffect effect : effects) {
             effect.runTask(plugin);
         }
         return true;

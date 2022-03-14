@@ -38,20 +38,20 @@ public class ParticleCommand extends GenericEffectCommand<ParticleEffect> {
             String name = entry.getKey().toLowerCase();
             ParticleTypeNames enumLookup = ParticleTypeNames.valueOf(name.toUpperCase());
             String value = entry.getValue().get(0);
-            data.put(enumLookup,value);
+            data.put(enumLookup, value);
             mainEffect.setData(data);
             while (effects.size() < vals.size()) {
-                effects.add((ParticleEffect) mainEffect.clone());
+                effects.add(new ParticleEffect());
             }
-            for(int i = 1; i < vals.size(); i++) {
+            for (int i = 1; i < vals.size(); i++) {
                 ParticleEffect effect = effects.get(i);
                 enumLookup = ParticleTypeNames.valueOf(name.toUpperCase());
                 value = entry.getValue().get(i);
-                data.put(enumLookup,value);
+                data.put(enumLookup, value);
                 effect.setData(data);
             }
         }
-        for(ParticleEffect effect : effects) {
+        for (ParticleEffect effect : effects) {
             effect.runTask(plugin);
         }
         return true;

@@ -7,7 +7,6 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class EffectsAPIMainCommand extends BukkitTreeCommand {
     public EffectsAPIMainCommand(Plugin plugin) {

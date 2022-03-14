@@ -17,10 +17,64 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 public class FireworkSafetyListener implements Listener {
+    //number of detonations by firework id
+    private static final ConcurrentHashMap<Integer, FireworkDetonation> fireworkDetonations = new ConcurrentHashMap<>();
+    //temporarily store entity id within range of firework to cancel damage in another event
+    //  the reason I set up safety this way instead of setInvulnerable is because:
+    //    - I do not want a crash to cause permanent invulnerability.
+    //    - I do not want to interfere with other FireworkTypeNames of damage.
+    //  static because can be common between instances and should be accessible from FireworkEffect
+    private static final ConcurrentSkipListSet<Integer> safeEntities = new ConcurrentSkipListSet<>();
     private final Plugin caller;
 
+    public FireworkSafetyListener(Plugin caller) {
+        this.caller = caller;
+    }
+
+    public static void addFirework(Integer fireworkId, Integer numExplosions, Boolean isSafe) {
+        FireworkDetonation res = fireworkDetonations.put(fireworkId, new FireworkDetonation(fireworkId, numExplosions, isSafe));
+    }
+
+    //multiply explosions rather than fireworks, for fewer moving parts
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onFireworkExplode(FireworkExplodeEvent event) {
+        Integer fireworkId = event.getEntity().getEntityId();
+
+        //comparator only uses id so this should return the actual option
+        FireworkDetonation fireworkDetonation = fireworkDetonations.get(fireworkId);
+        if (fireworkDetonation == null) return; //stop if firework was not on the list
+
+        if (fireworkDetonation.isSafe) {
+            Collection<Entity> entities = event.getEntity().getNearbyEntities(5, 5, 5);
+            for (Entity entity : entities) {
+                safeEntities.add(entity.getEntityId());
+            }
+
+            Bukkit.getScheduler().runTaskLater(caller, () -> {
+                for (Entity entity : entities) {
+                    safeEntities.remove(entity.getEntityId());
+                }
+            }, 1);
+        }
+
+        fireworkDetonations.remove(fireworkId); //remove from map to prevent recursion
+        Location location = event.getEntity().getLocation();
+        for (int i = 1; i < fireworkDetonation.numExplosions; i++) { //one already ran to trigger this, so start from 1
+            Firework firework = (Firework) location.getWorld().spawnEntity(location, event.getEntityType());
+            firework.setFireworkMeta(event.getEntity().getFireworkMeta());
+            firework.detonate();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onFireworkDamage(EntityDamageByEntityEvent event) {
+        if (event.isCancelled()) return;
+        if (!event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_EXPLOSION)) return;
+        if (safeEntities.contains(event.getEntity().getEntityId())) event.setCancelled(true);
+    }
+
     //container for firework data
-    private static class FireworkDetonation implements Comparable<FireworkDetonation>{
+    private static class FireworkDetonation implements Comparable<FireworkDetonation> {
         public Integer fireworkId; //entity id of firework
         public Integer numExplosions; //number of explosions to produce
         public Boolean isSafe; // do or don't protect entities within a 5-meter radius
@@ -46,61 +100,5 @@ public class FireworkSafetyListener implements Listener {
         public int compareTo(FireworkDetonation o) {
             return this.fireworkId.compareTo(o.fireworkId);
         }
-    }
-
-    //number of detonations by firework id
-    private static ConcurrentHashMap<Integer,FireworkDetonation> fireworkDetonations = new ConcurrentHashMap<>();
-
-    //temporarily store entity id within range of firework to cancel damage in another event
-    //  the reason I set up safety this way instead of setInvulnerable is because:
-    //    - I do not want a crash to cause permanent invulnerability.
-    //    - I do not want to interfere with other FireworkTypeNames of damage.
-    //  static because can be common between instances and should be accessible from FireworkEffect
-    private static ConcurrentSkipListSet<Integer> safeEntities = new ConcurrentSkipListSet<>();
-
-    public FireworkSafetyListener(Plugin caller){
-        this.caller = caller;
-    }
-
-    public static void addFirework(Integer fireworkId, Integer numExplosions, Boolean isSafe) {
-        FireworkDetonation res = fireworkDetonations.put(fireworkId,new FireworkDetonation(fireworkId,numExplosions,isSafe));
-    }
-
-    //multiply explosions rather than fireworks, for fewer moving parts
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onFireworkExplode(FireworkExplodeEvent event) {
-        Integer fireworkId = event.getEntity().getEntityId();
-
-        //comparator only uses id so this should return the actual option
-        FireworkDetonation fireworkDetonation = fireworkDetonations.get(fireworkId);
-        if(fireworkDetonation == null) return; //stop if firework was not on the list
-
-        if(fireworkDetonation.isSafe) {
-            Collection<Entity> entities = event.getEntity().getNearbyEntities(5,5,5);
-            for(Entity entity : entities) {
-                safeEntities.add(entity.getEntityId());
-            }
-
-            Bukkit.getScheduler().runTaskLater(caller,()->{
-                for(Entity entity : entities) {
-                    safeEntities.remove(entity.getEntityId());
-                }
-            },1);
-        }
-
-        fireworkDetonations.remove(fireworkId); //remove from map to prevent recursion
-        Location location = event.getEntity().getLocation();
-        for(int i = 1; i < fireworkDetonation.numExplosions; i++) { //one already ran to trigger this, so start from 1
-            Firework firework = (Firework) location.getWorld().spawnEntity(location,event.getEntityType());
-            firework.setFireworkMeta(event.getEntity().getFireworkMeta());
-            firework.detonate();
-        }
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onFireworkDamage(EntityDamageByEntityEvent event) {
-        if(event.isCancelled()) return;
-        if(!event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_EXPLOSION)) return;
-        if(safeEntities.contains(event.getEntity().getEntityId())) event.setCancelled(true);
     }
 }

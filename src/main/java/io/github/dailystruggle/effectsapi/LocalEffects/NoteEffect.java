@@ -13,7 +13,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class NoteEffect extends Effect<NoteTypeNames> {
@@ -30,38 +32,13 @@ public class NoteEffect extends Effect<NoteTypeNames> {
         this.defaults = data.clone();
     }
 
-    private final class MakeNoteSound extends BukkitRunnable {
-        @Override
-        public void run() {
-            Location location = ((Location)target);
-            List<Player> players = Objects.requireNonNull(location.getWorld()).getPlayers()
-                    .parallelStream().filter(player -> (player.getLocation().distance(location)<48))
-                    .collect(Collectors.toList());
-            for(Player player : players) {
-                player.playNote(location,
-                        (Instrument) data.get(NoteTypeNames.TYPE),
-                        new Note((Integer) data.get(NoteTypeNames.TONE)));
-            }
-            makeNoteSoundTask = null;
-        }
-    }
-
-    private final class Cleanup extends BukkitRunnable {
-        @Override
-        public void run() {
-            Location location = ((Location)target);
-            location.getBlock().setBlockData(oldBlockData);
-            cleanupTask = null;
-        }
-    }
-
     /**
      * this is technically a runnable, so a run function needs to be filled out for what to do.
      * In this case,
      */
     @Override
     public void run() {
-        if(target instanceof Entity) target = ((Entity) target).getLocation();
+        if (target instanceof Entity) target = ((Entity) target).getLocation();
         NoteBlock noteData = (NoteBlock) Bukkit.createBlockData(Material.NOTE_BLOCK);
         noteData.setInstrument((Instrument) data.get(NoteTypeNames.TYPE));
         noteData.setNote(new Note((Integer) data.get(NoteTypeNames.TONE)));
@@ -77,16 +54,41 @@ public class NoteEffect extends Effect<NoteTypeNames> {
         BukkitTask res = super.runTask(plugin);
 
         //delay 1 tick to ensure note block placement on client side
-        makeNoteSoundTask = new MakeNoteSound().runTaskLater(plugin,1);
+        makeNoteSoundTask = new MakeNoteSound().runTaskLater(plugin, 1);
 
         //delay 1 more tick to ensure note plays before removal
-        cleanupTask = new Cleanup().runTaskLater(plugin,2);
+        cleanupTask = new Cleanup().runTaskLater(plugin, 2);
         return res;
     }
 
     @Override
     public void cancel() {
-        if(makeNoteSoundTask!=null)makeNoteSoundTask.cancel();
-        if(cleanupTask!=null)cleanupTask.cancel();
+        if (makeNoteSoundTask != null) makeNoteSoundTask.cancel();
+        if (cleanupTask != null) cleanupTask.cancel();
+    }
+
+    private final class MakeNoteSound extends BukkitRunnable {
+        @Override
+        public void run() {
+            Location location = ((Location) target);
+            List<Player> players = Objects.requireNonNull(location.getWorld()).getPlayers()
+                    .parallelStream().filter(player -> (player.getLocation().distance(location) < 48))
+                    .collect(Collectors.toList());
+            for (Player player : players) {
+                player.playNote(location,
+                        (Instrument) data.get(NoteTypeNames.TYPE),
+                        new Note((Integer) data.get(NoteTypeNames.TONE)));
+            }
+            makeNoteSoundTask = null;
+        }
+    }
+
+    private final class Cleanup extends BukkitRunnable {
+        @Override
+        public void run() {
+            Location location = ((Location) target);
+            location.getBlock().setBlockData(oldBlockData);
+            cleanupTask = null;
+        }
     }
 }

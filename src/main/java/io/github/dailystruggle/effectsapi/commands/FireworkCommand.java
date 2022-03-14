@@ -1,14 +1,16 @@
 package io.github.dailystruggle.effectsapi.commands;
 
 import io.github.dailystruggle.commandsapi.common.CommandsAPICommand;
-import io.github.dailystruggle.effectsapi.Effect;
 import io.github.dailystruggle.effectsapi.LocalEffects.FireworkEffect;
 import io.github.dailystruggle.effectsapi.LocalEffects.enums.FireworkTypeNames;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 public class FireworkCommand extends GenericEffectCommand<FireworkEffect> {
     public FireworkCommand(Plugin plugin) {
@@ -19,7 +21,7 @@ public class FireworkCommand extends GenericEffectCommand<FireworkEffect> {
     public boolean onCommand(CommandSender sender,
                              Map<String, List<String>> parameterValues,
                              CommandsAPICommand nextCommand) {
-        if(!(sender instanceof Player)) return false;
+        if (!(sender instanceof Player)) return false;
         List<FireworkEffect> effects = new ArrayList<>();
         FireworkEffect mainEffect = new FireworkEffect();
         effects.add(mainEffect);
@@ -30,20 +32,20 @@ public class FireworkCommand extends GenericEffectCommand<FireworkEffect> {
             String name = entry.getKey().toLowerCase();
             FireworkTypeNames enumLookup = FireworkTypeNames.valueOf(name.toUpperCase());
             String value = entry.getValue().get(0);
-            data.put(enumLookup,value);
+            data.put(enumLookup, value);
             mainEffect.setData(data);
             while (effects.size() < vals.size()) {
-                effects.add((FireworkEffect) mainEffect.clone());
+                effects.add(new FireworkEffect());
             }
-            for(int i = 1; i < vals.size(); i++) {
+            for (int i = 1; i < vals.size(); i++) {
                 FireworkEffect effect = effects.get(i);
                 enumLookup = FireworkTypeNames.valueOf(name.toUpperCase());
                 value = entry.getValue().get(i);
-                data.put(enumLookup,value);
+                data.put(enumLookup, value);
                 effect.setData(data);
             }
         }
-        for(FireworkEffect effect : effects) {
+        for (FireworkEffect effect : effects) {
             effect.runTask(plugin);
         }
         return true;

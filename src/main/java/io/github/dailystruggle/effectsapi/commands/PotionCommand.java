@@ -28,30 +28,36 @@ public class PotionCommand extends GenericEffectCommand<PotionEffect> {
 
     @Override
     public boolean onCommand(CommandSender sender, Map<String, List<String>> parameterValues, CommandsAPICommand nextCommand) {
-        List<PotionEffect> effects = new ArrayList<>();
         PotionEffect mainEffect = new PotionEffect();
+        List<PotionEffect> effects = new ArrayList<>();
         effects.add(mainEffect);
         mainEffect.setTarget(sender);
         EnumMap<PotionTypeNames, Object> data = mainEffect.getData();
+        int longest = 1;
         for (Map.Entry<String, List<String>> entry : parameterValues.entrySet()) {
-            List<String> vals = entry.getValue();
             String name = entry.getKey().toLowerCase();
+            List<String> vals = entry.getValue();
+
             PotionTypeNames enumLookup = PotionTypeNames.valueOf(name.toUpperCase());
             String value = entry.getValue().get(0);
-            data.put(enumLookup,value);
-            mainEffect.setData(data);
+            data.put(enumLookup, value);
+
+            //if there are more values to process later, add the copies
+            longest = Math.max(longest, vals.size());
             while (effects.size() < vals.size()) {
-                effects.add((PotionEffect) mainEffect.clone());
+                effects.add(new PotionEffect());
             }
-            for(int i = 1; i < vals.size(); i++) {
+            for (int i = 1; i < vals.size(); i++) {
                 PotionEffect effect = effects.get(i);
                 enumLookup = PotionTypeNames.valueOf(name.toUpperCase());
                 value = entry.getValue().get(i);
-                data.put(enumLookup,value);
+                data.put(enumLookup, value);
                 effect.setData(data);
             }
         }
-        for(PotionEffect effect : effects) {
+        mainEffect.setData(data);
+
+        for (PotionEffect effect : effects) {
             effect.runTask(plugin);
         }
         return true;

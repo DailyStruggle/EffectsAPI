@@ -1,15 +1,12 @@
 package io.github.dailystruggle.effectsapi.commands;
 
 import io.github.dailystruggle.commandsapi.bukkit.localCommands.BukkitTreeCommand;
-import io.github.dailystruggle.commandsapi.common.CommandParameter;
 import io.github.dailystruggle.commandsapi.common.CommandsAPICommand;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class TestCommand extends BukkitTreeCommand {
 
