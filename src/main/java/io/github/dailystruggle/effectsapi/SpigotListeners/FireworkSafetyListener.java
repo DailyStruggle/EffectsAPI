@@ -1,7 +1,9 @@
 package io.github.dailystruggle.effectsapi.SpigotListeners;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Firework;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -52,7 +54,7 @@ public class FireworkSafetyListener implements Listener {
     //temporarily store entity id within range of firework to cancel damage in another event
     //  the reason I set up safety this way instead of setInvulnerable is because:
     //    - I do not want a crash to cause permanent invulnerability.
-    //    - I do not want to interfere with other types of damage.
+    //    - I do not want to interfere with other FireworkTypeNames of damage.
     //  static because can be common between instances and should be accessible from FireworkEffect
     private static ConcurrentSkipListSet<Integer> safeEntities = new ConcurrentSkipListSet<>();
 
@@ -87,8 +89,11 @@ public class FireworkSafetyListener implements Listener {
         }
 
         fireworkDetonations.remove(fireworkId); //remove from map to prevent recursion
+        Location location = event.getEntity().getLocation();
         for(int i = 1; i < fireworkDetonation.numExplosions; i++) { //one already ran to trigger this, so start from 1
-            event.getEntity().detonate();
+            Firework firework = (Firework) location.getWorld().spawnEntity(location,event.getEntityType());
+            firework.setFireworkMeta(event.getEntity().getFireworkMeta());
+            firework.detonate();
         }
     }
 

@@ -1,6 +1,7 @@
 package io.github.dailystruggle.effectsapi.LocalEffects;
 
 import io.github.dailystruggle.effectsapi.Effect;
+import io.github.dailystruggle.effectsapi.LocalEffects.enums.NoteTypeNames;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -8,93 +9,84 @@ import org.bukkit.block.data.type.NoteBlock;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
+import java.util.*;
 import java.util.stream.Collectors;
 
-public class NoteEffect extends Effect {
-    Instrument instrument = Instrument.PIANO;
-    Integer tone=0;
+public class NoteEffect extends Effect<NoteTypeNames> {
+    private BukkitTask makeNoteSoundTask = null;
+    private BukkitTask cleanupTask = null;
+    private BlockData oldBlockData;
 
-    public NoteEffect() {
-
+    public NoteEffect() throws IllegalArgumentException {
+        super(new EnumMap<>(NoteTypeNames.class));
+        EnumMap<NoteTypeNames, Object> data = getData();
+        data.put(NoteTypeNames.TYPE, Instrument.PIANO);
+        data.put(NoteTypeNames.TONE, 0);
+        this.data = data;
+        this.defaults = data.clone();
     }
 
-    public NoteEffect(Instrument instrument, Integer tone) {
-        setData(instrument,tone);
+    private final class MakeNoteSound extends BukkitRunnable {
+        @Override
+        public void run() {
+            Location location = ((Location)target);
+            List<Player> players = Objects.requireNonNull(location.getWorld()).getPlayers()
+                    .parallelStream().filter(player -> (player.getLocation().distance(location)<48))
+                    .collect(Collectors.toList());
+            for(Player player : players) {
+                player.playNote(location,
+                        (Instrument) data.get(NoteTypeNames.TYPE),
+                        new Note((Integer) data.get(NoteTypeNames.TONE)));
+            }
+            makeNoteSoundTask = null;
+        }
     }
 
+    private final class Cleanup extends BukkitRunnable {
+        @Override
+        public void run() {
+            Location location = ((Location)target);
+            location.getBlock().setBlockData(oldBlockData);
+            cleanupTask = null;
+        }
+    }
+
+    /**
+     * this is technically a runnable, so a run function needs to be filled out for what to do.
+     * In this case,
+     */
     @Override
-    public void setData(Object... data) throws IllegalArgumentException {
-        if(data.length>0) {//type
-            if(data[0] instanceof String) {
-                instrument = Instrument.valueOf(((String)data[0]).toUpperCase());
-            }
-            else if(data[0] instanceof Instrument){
-                instrument = (Instrument) data[0];
-            }
-            else {
-                throw new IllegalArgumentException("[EffectAPI] invalid instrument: " + data[0]);
-            }
-        }
-        if(data.length>1) {//tone
-            if (data[1] instanceof String) {
-                tone = Integer.parseInt(((String) data[1]));
-            } else if (data[1] instanceof Integer) {
-                tone = (Integer) data[1];
-            } else {
-                throw new IllegalArgumentException("[EffectAPI] invalid tone: " + data[1]);
-            }
-        }
-        super.setData(instrument,tone);
-    }
-
-    @Override
-    public Object[] getData() {
-        return new Object[]{instrument,tone};
-    }
-
-    @Override
-    public void trigger(Location location, Plugin caller) {
-        if(Bukkit.isPrimaryThread()) {
-            triggerSync(location, caller);
-        }
-        else {
-            Bukkit.getScheduler().runTask(caller, ()-> triggerSync(location, caller));
-        }
-    }
-
-    private void triggerSync(Location location, Plugin caller){
-        Predicate<Player> inRange = player -> (player.getLocation().distance(location)<48);
-        List<Player> players = Objects.requireNonNull(location.getWorld()).getPlayers()
-                .parallelStream().filter(inRange).collect(Collectors.toList());
-
+    public void run() {
+        if(target instanceof Entity) target = ((Entity) target).getLocation();
         NoteBlock noteData = (NoteBlock) Bukkit.createBlockData(Material.NOTE_BLOCK);
-        noteData.setInstrument(instrument);
-        noteData.setNote(new Note(tone));
+        noteData.setInstrument((Instrument) data.get(NoteTypeNames.TYPE));
+        noteData.setNote(new Note((Integer) data.get(NoteTypeNames.TONE)));
 
-        final Block block = location.getBlock();
-        final BlockData oldBlockData = block.getBlockData().clone();
+        Block block = ((Location) target).getBlock();
+        oldBlockData = block.getBlockData().clone();
         block.setBlockData(noteData);
+    }
+
+    @Override
+    @NotNull
+    public synchronized BukkitTask runTask(@NotNull Plugin plugin) {
+        BukkitTask res = super.runTask(plugin);
 
         //delay 1 tick to ensure note block placement on client side
-        Bukkit.getScheduler().runTaskLater(caller,()-> {
-            for(Player player : players) {
-                player.playNote(location,instrument, new Note(tone));
-            }
-        },1);
+        makeNoteSoundTask = new MakeNoteSound().runTaskLater(plugin,1);
 
-        //delay 1 more tick to ensure this runs after note sound
-        Bukkit.getScheduler().runTaskLater(caller,()->block.setBlockData(oldBlockData),2);
+        //delay 1 more tick to ensure note plays before removal
+        cleanupTask = new Cleanup().runTaskLater(plugin,2);
+        return res;
     }
 
     @Override
-    public void trigger(Entity entity, Plugin caller) {
-        if(entity instanceof Player) {
-            ((Player)entity).playNote(entity.getLocation(),instrument,new Note(tone));
-        }
-        else trigger(entity.getLocation(), caller);
+    public void cancel() {
+        if(makeNoteSoundTask!=null)makeNoteSoundTask.cancel();
+        if(cleanupTask!=null)cleanupTask.cancel();
     }
 }

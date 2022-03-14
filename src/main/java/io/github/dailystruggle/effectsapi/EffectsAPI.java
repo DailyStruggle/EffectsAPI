@@ -1,19 +1,18 @@
 package io.github.dailystruggle.effectsapi;
 
+import io.github.dailystruggle.commandsapi.bukkit.localCommands.BukkitTreeCommand;
 import io.github.dailystruggle.effectsapi.SpigotListeners.FireworkSafetyListener;
+import io.github.dailystruggle.effectsapi.commands.EffectsAPIMainCommand;
+import io.github.dailystruggle.effectsapi.commands.FireworkCommand;
+import io.github.dailystruggle.effectsapi.commands.TestCommand;
 import org.bukkit.Bukkit;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Instrument;
-import org.bukkit.Particle;
-import org.bukkit.permissions.Permission;
+import org.bukkit.command.Command;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Level;
+import java.util.Objects;
 
 //reference point for
 public final class EffectsAPI extends JavaPlugin {
@@ -39,12 +38,7 @@ public final class EffectsAPI extends JavaPlugin {
     }
 
     public EffectsAPI(Plugin caller) {
-        if(fireworkSafetyListener == null) {
-            //on first initialization, register firework safety events
-            Bukkit.getPluginManager().registerEvents(
-                    new FireworkSafetyListener(this),
-                    caller);
-        }
+        init(caller);
     }
 
     private static String getServerVersion() {
@@ -74,12 +68,14 @@ public final class EffectsAPI extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Plugin startup logic, in case of standalone usage
-        if(fireworkSafetyListener == null) {
-            //on first initialization, register firework safety events
-            fireworkSafetyListener = new FireworkSafetyListener(this);
-            Bukkit.getPluginManager().registerEvents(fireworkSafetyListener,this);
-        }
+        init(this);
+
+        //set up testCommand
+        BukkitTreeCommand mainCommand = new EffectsAPIMainCommand(this);
+        PluginCommand command = Objects.requireNonNull(getCommand("effectsapi"));
+        command.setExecutor(mainCommand);
+        command.setTabCompleter(mainCommand);
+
 
         //todo: set up command and tabcompleter
     }
@@ -88,5 +84,16 @@ public final class EffectsAPI extends JavaPlugin {
     public void onDisable() {
         // Plugin shutdown logic
         instance = null;
+    }
+
+    private static void init(Plugin caller) {
+        // Plugin startup logic, in case of standalone usage
+        if(fireworkSafetyListener == null) {
+            //on first initialization, register firework safety events
+            fireworkSafetyListener = new FireworkSafetyListener(caller);
+            Bukkit.getPluginManager().registerEvents(fireworkSafetyListener,caller);
+        }
+
+        //construct commands
     }
 }
