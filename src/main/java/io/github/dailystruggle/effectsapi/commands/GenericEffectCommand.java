@@ -18,7 +18,7 @@ public abstract class GenericEffectCommand<T extends Effect<?>> extends BukkitTr
     protected final Class<T> persistentClass;
 
     public GenericEffectCommand(Plugin plugin) {
-        super(plugin);
+        super(plugin,null);
         this.persistentClass = (Class<T>) ((ParameterizedType) getClass()
                 .getGenericSuperclass()).getActualTypeArguments()[0];
 
@@ -34,26 +34,36 @@ public abstract class GenericEffectCommand<T extends Effect<?>> extends BukkitTr
             Bukkit.getLogger().warning("a- " + entry.getKey() + entry.getValue());
 
             if (val instanceof Integer || val instanceof Long) {
-                addParameter(entry.getKey().toString().toLowerCase(), new IntegerParameter((sender1, s) -> true, 0, 1));
+                addParameter(entry.getKey().toString().toLowerCase(), new IntegerParameter("effectsapi.see","",(sender1, s) -> true, 0, 1));
             } else if (val instanceof Float || val instanceof Double) {
-                addParameter(entry.getKey().toString().toLowerCase(), new FloatParameter((sender1, s) -> true, 0.0, 1.0));
+                addParameter(entry.getKey().toString().toLowerCase(), new FloatParameter("effectsapi.see","",(sender1, s) -> true, 0.0, 1.0));
             } else if (val instanceof Boolean) {
-                addParameter(entry.getKey().toString().toLowerCase(), new BooleanParameter((sender1, s) -> true));
+                addParameter(entry.getKey().toString().toLowerCase(), new BooleanParameter("effectsapi.see","",(sender1, s) -> true));
             } else if (val instanceof Color) {
-                addParameter(entry.getKey().toString().toLowerCase(), new ColorParameter((sender1, s) -> true));
+                addParameter(entry.getKey().toString().toLowerCase(), new ColorParameter("effectsapi.see","",(sender1, s) -> true));
             } else if (val instanceof PotionEffectType) {
-                addParameter(entry.getKey().toString().toLowerCase(), new PotionParameter((sender1, s) -> true));
+                addParameter(entry.getKey().toString().toLowerCase(), new PotionParameter("effectsapi.see","",(sender1, s) -> true));
             } else if (val instanceof Enum<?>) {
                 Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) val.getClass();
-                addParameter(entry.getKey().toString().toLowerCase(Locale.ROOT), new BukkitParameter((sender1, s) -> true) {
-                    private final List<String> values = Arrays.stream(enumClass.getEnumConstants()).map(Enum::name).collect(Collectors.toList());
+                addParameter(entry.getKey().toString().toLowerCase(Locale.ROOT), new BukkitParameter("effectsapi.see","",(sender1, s) -> true) {
+                    private final Set<String> values = Arrays.stream(enumClass.getEnumConstants()).map(Enum::name).collect(Collectors.toSet());
 
                     @Override
-                    public Collection<String> values() {
+                    public Set<String> values() {
                         return values;
                     }
                 });
             } else throw new IllegalArgumentException("bad type for - " + val);
         }
+    }
+
+    @Override
+    public String description() {
+        return null;
+    }
+
+    @Override
+    public void msgBadParameter(UUID callerId, String parameterName, String parameterValue) {
+
     }
 }

@@ -2,16 +2,18 @@ package io.github.dailystruggle.effectsapi.commands;
 
 import io.github.dailystruggle.commandsapi.bukkit.localCommands.BukkitTreeCommand;
 import io.github.dailystruggle.commandsapi.common.CommandsAPICommand;
+import io.github.dailystruggle.effectsapi.EffectsAPI;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class EffectsAPIMainCommand extends BukkitTreeCommand {
     public EffectsAPIMainCommand(Plugin plugin) {
-        super(plugin);
-        addSubCommand(new TestCommand(plugin));
+        super(EffectsAPI.getInstance(),null);
+        addSubCommand(new TestCommand(plugin, this));
     }
 
     @Override
@@ -26,6 +28,16 @@ public class EffectsAPIMainCommand extends BukkitTreeCommand {
 
     @Override
     public String permission() {
-        return "";
+        return "effectsapi.see";
+    }
+
+    @Override
+    public String description() {
+        return "generate effects by command";
+    }
+
+    @Override
+    public void msgBadParameter(UUID callerId, String parameterName, String parameterValue) {
+
     }
 }

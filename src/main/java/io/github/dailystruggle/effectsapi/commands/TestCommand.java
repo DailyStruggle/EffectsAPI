@@ -7,11 +7,11 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class TestCommand extends BukkitTreeCommand {
-
-    public TestCommand(Plugin plugin) {
-        super(plugin);
+    public TestCommand(Plugin plugin, CommandsAPICommand parent) {
+        super(plugin, parent);
         addSubCommand(new FireworkCommand(plugin));
         addSubCommand(new NoteCommand(plugin));
         addSubCommand(new ParticleCommand(plugin));
@@ -27,6 +27,16 @@ public class TestCommand extends BukkitTreeCommand {
     @Override
     public String permission() {
         return "EffectsAPI.test";
+    }
+
+    @Override
+    public String description() {
+        return "";
+    }
+
+    @Override
+    public void msgBadParameter(UUID callerId, String parameterName, String parameterValue) {
+
     }
 
     @Override
