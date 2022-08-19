@@ -6,7 +6,7 @@
 
     <groupId>io.github.dailystruggle</groupId>
     <artifactId>EffectsAPI</artifactId>
-    <version>1.0-ALPHA04</version>
+    <version>1.0-ALPHA21</version>
     <packaging>jar</packaging>
 
     <name>EffectsAPI</name>
@@ -20,8 +20,6 @@
     <developers>
         <developer>
             <id>leaf26</id>
-            <name>John Goldsmith</name>
-            <email>lxgoldsmith@gmail.com</email>
             <organization>LeafCraft</organization>
             <organizationUrl>https://github.com/DailyStruggle</organizationUrl>
             <roles>
@@ -225,19 +223,7 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>RELEASE</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bstats</groupId>
-            <artifactId>bstats-bukkit</artifactId>
-            <version>2.2.1</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.papermc</groupId>
-            <artifactId>paperlib</artifactId>
-            <version>1.0.7</version>
-            <scope>compile</scope>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -248,7 +234,13 @@
         <dependency>
             <groupId>io.github.dailystruggle</groupId>
             <artifactId>CommandsAPI</artifactId>
-            <version>1.0-ALPHA44</version>
+            <version>1.0-ALPHA63</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>23.0.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

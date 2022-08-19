@@ -1,6 +1,7 @@
 package io.github.dailystruggle.effectsapi;
 
 import io.github.dailystruggle.commandsapi.bukkit.localCommands.BukkitTreeCommand;
+import io.github.dailystruggle.commandsapi.common.CommandsAPI;
 import io.github.dailystruggle.effectsapi.SpigotListeners.FireworkSafetyListener;
 import io.github.dailystruggle.effectsapi.commands.EffectsAPIMainCommand;
 import org.bukkit.Bukkit;
@@ -9,7 +10,10 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 //reference point for
 public final class EffectsAPI extends JavaPlugin {
@@ -58,7 +62,7 @@ public final class EffectsAPI extends JavaPlugin {
         return intVersion;
     }
 
-    private static void init(Plugin caller) {
+    public static void init(Plugin caller) {
         // Plugin startup logic, in case of standalone usage
         if (fireworkSafetyListener == null) {
             //on first initialization, register firework safety events
@@ -79,6 +83,7 @@ public final class EffectsAPI extends JavaPlugin {
         command.setExecutor(mainCommand);
         command.setTabCompleter(mainCommand);
 
+        Bukkit.getScheduler().runTaskTimer(this,() -> CommandsAPI.execute(Long.MAX_VALUE),20,1);
 
         //todo: set up command and tabcompleter
     }

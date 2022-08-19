@@ -31,7 +31,6 @@ public abstract class GenericEffectCommand<T extends Effect<?>> extends BukkitTr
         }
         for (Map.Entry<? extends Enum<?>, Object> entry : effect.getData().entrySet()) {
             Object val = entry.getValue();
-            Bukkit.getLogger().warning("a- " + entry.getKey() + entry.getValue());
 
             if (val instanceof Integer || val instanceof Long) {
                 addParameter(entry.getKey().toString().toLowerCase(), new IntegerParameter("effectsapi.see","",(sender1, s) -> true, 0, 1));
@@ -45,7 +44,7 @@ public abstract class GenericEffectCommand<T extends Effect<?>> extends BukkitTr
                 addParameter(entry.getKey().toString().toLowerCase(), new PotionParameter("effectsapi.see","",(sender1, s) -> true));
             } else if (val instanceof Enum<?>) {
                 Class<? extends Enum<?>> enumClass = (Class<? extends Enum<?>>) val.getClass();
-                addParameter(entry.getKey().toString().toLowerCase(Locale.ROOT), new BukkitParameter("effectsapi.see","",(sender1, s) -> true) {
+                addParameter(entry.getKey().toString().toLowerCase(), new BukkitParameter("effectsapi.see","",(sender1, s) -> true) {
                     private final Set<String> values = Arrays.stream(enumClass.getEnumConstants()).map(Enum::name).collect(Collectors.toSet());
 
                     @Override
@@ -59,7 +58,7 @@ public abstract class GenericEffectCommand<T extends Effect<?>> extends BukkitTr
 
     @Override
     public String description() {
-        return null;
+        return "";
     }
 
     @Override

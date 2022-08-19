@@ -3,6 +3,7 @@ package io.github.dailystruggle.effectsapi.commands;
 import io.github.dailystruggle.commandsapi.common.CommandsAPICommand;
 import io.github.dailystruggle.effectsapi.LocalEffects.FireworkEffect;
 import io.github.dailystruggle.effectsapi.LocalEffects.enums.FireworkTypeNames;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -45,6 +46,7 @@ public class FireworkCommand extends GenericEffectCommand<FireworkEffect> {
                 effect.setData(data);
             }
         }
+
         for (FireworkEffect effect : effects) {
             effect.runTask(plugin);
         }

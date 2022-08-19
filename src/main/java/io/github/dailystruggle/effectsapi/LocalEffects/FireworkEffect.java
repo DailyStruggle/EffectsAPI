@@ -2,6 +2,7 @@ package io.github.dailystruggle.effectsapi.LocalEffects;
 
 import io.github.dailystruggle.effectsapi.Effect;
 import io.github.dailystruggle.effectsapi.LocalEffects.enums.FireworkTypeNames;
+import io.github.dailystruggle.effectsapi.LocalEffects.enums.PotionTypeNames;
 import io.github.dailystruggle.effectsapi.SpigotListeners.FireworkSafetyListener;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -38,12 +39,36 @@ public class FireworkEffect extends Effect<FireworkTypeNames> {
         if (target instanceof Entity) target = ((Entity) target).getLocation();
         Location location = (Location) target;
 
-        int numFireworks = (Integer) data.get(FireworkTypeNames.NUMBER);
+        int numFireworks = 1;
+        double dx=0, dy=1, dz=0;
+        Color color = Color.WHITE, fade = Color.WHITE;
+        boolean flicker=false, trail=false, safe=true;
 
-        double dx, dy, dz;
-        dx = (Double) data.get(FireworkTypeNames.DX);
-        dy = (Double) data.get(FireworkTypeNames.DY);
-        dz = (Double) data.get(FireworkTypeNames.DZ);
+        Object o = data.get(FireworkTypeNames.NUMBER);
+        if(o instanceof Number n) numFireworks = n.intValue();
+
+
+        o = data.get(FireworkTypeNames.DX);
+        if(o instanceof Number n) dx = n.doubleValue();
+        o = data.get(FireworkTypeNames.DY);
+        if(o instanceof Number n) dy = n.doubleValue();
+        o = data.get(FireworkTypeNames.DZ);
+        if(o instanceof Number n) dz = n.doubleValue();
+
+        o = data.get(FireworkTypeNames.COLOR);
+        if(o instanceof Color c) color = c;
+
+        o = data.get(FireworkTypeNames.FADE);
+        if(o instanceof Color c) fade = c;
+
+        o = data.get(FireworkTypeNames.FLICKER);
+        if(o instanceof Boolean b) flicker = b;
+
+        o = data.get(FireworkTypeNames.TRAIL);
+        if(o instanceof Boolean b) trail = b;
+
+        o = data.get(FireworkTypeNames.SAFE);
+        if(o instanceof Boolean b) safe = b;
 
         //start with one firework
         Firework f = (Firework) Objects.requireNonNull(location.getWorld())
@@ -51,24 +76,54 @@ public class FireworkEffect extends Effect<FireworkTypeNames> {
         if (dx != 0.0 || dy != 1.0 || dz != 0.0) {
             f.setShotAtAngle(true);
             f.setVelocity(new Vector(dx, dy, dz));
-            //todo: is pitch/yaw relevant here?
         }
         FireworkMeta fwm = f.getFireworkMeta();
 
         org.bukkit.FireworkEffect fireworkEffect = org.bukkit.FireworkEffect.builder()
                 .with((org.bukkit.FireworkEffect.Type) data.get(FireworkTypeNames.TYPE))
-                .withColor((Color) data.get(FireworkTypeNames.COLOR))
-                .withFade((Color) data.get(FireworkTypeNames.FADE))
-                .flicker((Boolean) data.get(FireworkTypeNames.FLICKER))
-                .trail((Boolean) data.get(FireworkTypeNames.TRAIL))
+                .withColor(color)
+                .withFade(fade)
+                .flicker(flicker)
+                .trail(trail)
                 .build();
         fwm.addEffect(fireworkEffect);
         fwm.setPower((Integer) data.get(FireworkTypeNames.POWER));
         f.setFireworkMeta(fwm);
 
-        boolean safe = (Boolean) data.get(FireworkTypeNames.SAFE);
         //if more than one, add to the list to duplicate the explosion (cheaper than multiple firework entities)
         if (numFireworks > 1) FireworkSafetyListener.addFirework(f.getEntityId(), numFireworks, safe);
         if (fwm.getPower() == 0) f.detonate();
+    }
+
+    @Override
+    public void setData(String... data) {
+        if(data.length>0) this.data.put(FireworkTypeNames.TYPE, data[0]);
+        if(data.length>1) this.data.put(FireworkTypeNames.NUMBER, data[1]);
+        if(data.length>2) this.data.put(FireworkTypeNames.POWER, data[2]);
+        if(data.length>3) this.data.put(FireworkTypeNames.COLOR, data[3]);
+        if(data.length>4) this.data.put(FireworkTypeNames.FADE, data[4]);
+        if(data.length>5) this.data.put(FireworkTypeNames.FLICKER, data[5]);
+        if(data.length>6) this.data.put(FireworkTypeNames.TRAIL, data[6]);
+        if(data.length>7) this.data.put(FireworkTypeNames.SAFE, data[7]);
+        if(data.length>8) this.data.put(FireworkTypeNames.DX, data[8]);
+        if(data.length>9) this.data.put(FireworkTypeNames.DY, data[9]);
+        if(data.length>10) this.data.put(FireworkTypeNames.DZ, data[10]);
+        this.data = fixData(this.data);
+    }
+
+    @Override
+    public String toPermission() {
+        return this.data.get(FireworkTypeNames.TYPE).toString().replaceAll("\\.*", "") +
+                this.data.get(FireworkTypeNames.NUMBER).toString().replaceAll("\\.*", "") +
+                this.data.get(FireworkTypeNames.POWER).toString().replaceAll("\\.*", "") +
+                this.data.get(FireworkTypeNames.COLOR).toString().replaceAll("\\.*", "") +
+                this.data.get(FireworkTypeNames.FADE).toString().replaceAll("\\.*", "") +
+                this.data.get(FireworkTypeNames.FLICKER).toString().replaceAll("\\.*", "") +
+                this.data.get(FireworkTypeNames.TRAIL).toString().replaceAll("\\.*", "") +
+                this.data.get(FireworkTypeNames.SAFE).toString().replaceAll("\\.*", "") +
+                this.data.get(FireworkTypeNames.DX).toString().replaceAll("\\.*", "") +
+                this.data.get(FireworkTypeNames.DY).toString().replaceAll("\\.*", "") +
+                this.data.get(FireworkTypeNames.DZ).toString().replaceAll("\\.*", "");
+
     }
 }

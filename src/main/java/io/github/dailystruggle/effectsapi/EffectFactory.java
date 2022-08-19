@@ -1,13 +1,17 @@
 package io.github.dailystruggle.effectsapi;
 
 import io.github.dailystruggle.effectsapi.LocalEffects.*;
+import org.bukkit.Bukkit;
+import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 //factory to give and take effects
 //  I did this to centralize effects. Call this instead of switching on every possible effect
@@ -86,16 +90,38 @@ public class EffectFactory {
 
             Effect<?> effect;
             try {
-                effect = effectMap.get(val[0]).getConstructor().newInstance();
+                effect = effectMap.get(val[0].toUpperCase()).getConstructor().newInstance();
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 e.printStackTrace();
                 continue;
             }
             //todo: convert parameters to data
-//            effect.setData((Object[]) Arrays.copyOfRange(val,1,val.length));
+
+            if(val.length>1) effect.setData(Arrays.copyOfRange(val,1,val.length));
             res.add(effect);
         }
 
         return res;
+    }
+
+    public static void addPermissions(String permissionPrefix) {
+        if(!permissionPrefix.endsWith(".")) permissionPrefix = permissionPrefix + ".";
+        for(String name : effectMap.keySet()) {
+            Effect<?> effect = EffectFactory.buildEffect(name);
+            Enum<?>[] enumConstants = Objects.requireNonNull(effect).persistentClass.getEnumConstants();
+            Map<String,Enum<?>> enumMap = new HashMap<>();
+            if(enumConstants.length<50)for(Enum<?> e : enumConstants) enumMap.put(e.name().toUpperCase(),e);
+            Object o = effect.getData().get(enumMap.get("TYPE"));
+            if(o instanceof Enum e) {
+                for(var key : e.getClass().getEnumConstants()) {
+                    Bukkit.getPluginManager().addPermission(new Permission(permissionPrefix + name + "." + key));
+                }
+            }
+            else if(o instanceof PotionEffectType) {
+                for(var key : PotionEffectType.values()) {
+                    Bukkit.getPluginManager().addPermission(new Permission(permissionPrefix + name + "." + key));
+                }
+            }
+        }
     }
 }

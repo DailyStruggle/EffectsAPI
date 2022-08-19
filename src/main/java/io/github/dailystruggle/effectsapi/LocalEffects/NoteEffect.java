@@ -1,6 +1,7 @@
 package io.github.dailystruggle.effectsapi.LocalEffects;
 
 import io.github.dailystruggle.effectsapi.Effect;
+import io.github.dailystruggle.effectsapi.LocalEffects.enums.FireworkTypeNames;
 import io.github.dailystruggle.effectsapi.LocalEffects.enums.NoteTypeNames;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -67,17 +68,30 @@ public class NoteEffect extends Effect<NoteTypeNames> {
         if (cleanupTask != null) cleanupTask.cancel();
     }
 
+    @Override
+    public void setData(String... data) {
+        if(data.length>0) this.data.put(NoteTypeNames.TYPE, data[0]);
+        if(data.length>1) this.data.put(NoteTypeNames.TONE, data[1]);
+        this.data = fixData(this.data);
+    }
+
     private final class MakeNoteSound extends BukkitRunnable {
         @Override
         public void run() {
+            if(target instanceof Entity entity) target = entity.getLocation();
             Location location = ((Location) target);
+
+            int tone = 0;
+            Object o = data.get(NoteTypeNames.TONE);
+            if(o instanceof Number n) tone = n.intValue();
+
             List<Player> players = Objects.requireNonNull(location.getWorld()).getPlayers()
                     .parallelStream().filter(player -> (player.getLocation().distance(location) < 48))
                     .collect(Collectors.toList());
             for (Player player : players) {
                 player.playNote(location,
                         (Instrument) data.get(NoteTypeNames.TYPE),
-                        new Note((Integer) data.get(NoteTypeNames.TONE)));
+                        new Note(tone));
             }
             makeNoteSoundTask = null;
         }
@@ -90,5 +104,11 @@ public class NoteEffect extends Effect<NoteTypeNames> {
             location.getBlock().setBlockData(oldBlockData);
             cleanupTask = null;
         }
+    }
+
+    @Override
+    public String toPermission() {
+        return this.data.get(NoteTypeNames.TYPE).toString().replaceAll("\\.*", "") +
+                this.data.get(NoteTypeNames.TONE).toString().replaceAll("\\.*", "");
     }
 }
