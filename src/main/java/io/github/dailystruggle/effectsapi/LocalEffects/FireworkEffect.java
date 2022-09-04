@@ -45,30 +45,30 @@ public class FireworkEffect extends Effect<FireworkTypeNames> {
         boolean flicker=false, trail=false, safe=true;
 
         Object o = data.get(FireworkTypeNames.NUMBER);
-        if(o instanceof Number n) numFireworks = n.intValue();
+        if(o instanceof Number) numFireworks = ((Number) o).intValue();
 
 
         o = data.get(FireworkTypeNames.DX);
-        if(o instanceof Number n) dx = n.doubleValue();
+        if(o instanceof Number) dx = ((Number)o).doubleValue();
         o = data.get(FireworkTypeNames.DY);
-        if(o instanceof Number n) dy = n.doubleValue();
+        if(o instanceof Number) dy = ((Number)o).doubleValue();
         o = data.get(FireworkTypeNames.DZ);
-        if(o instanceof Number n) dz = n.doubleValue();
+        if(o instanceof Number) dz = ((Number)o).doubleValue();
 
         o = data.get(FireworkTypeNames.COLOR);
-        if(o instanceof Color c) color = c;
+        if(o instanceof Color) color = (Color) o;
 
         o = data.get(FireworkTypeNames.FADE);
-        if(o instanceof Color c) fade = c;
+        if(o instanceof Color) fade = (Color) o;
 
         o = data.get(FireworkTypeNames.FLICKER);
-        if(o instanceof Boolean b) flicker = b;
+        if(o instanceof Boolean) flicker = (Boolean) o;
 
         o = data.get(FireworkTypeNames.TRAIL);
-        if(o instanceof Boolean b) trail = b;
+        if(o instanceof Boolean) trail = (Boolean) o;
 
         o = data.get(FireworkTypeNames.SAFE);
-        if(o instanceof Boolean b) safe = b;
+        if(o instanceof Boolean) safe = (Boolean) o;
 
         //start with one firework
         Firework f = (Firework) Objects.requireNonNull(location.getWorld())

@@ -55,9 +55,9 @@ public abstract class Effect<T extends Enum<T>> extends BukkitRunnable implement
             Object val = data.get(entry.getKey());
             Object res = entry.getValue();
             if (!(type.isAssignableFrom(val.getClass()))) {
-                if(val instanceof String string) {
+                if(val instanceof String) {
                     try {
-                        res = str2Obj(entry.getKey(),string);
+                        res = str2Obj(entry.getKey(), (String) val);
                     } catch (IllegalArgumentException exception) {
                         exception.printStackTrace();
                     }

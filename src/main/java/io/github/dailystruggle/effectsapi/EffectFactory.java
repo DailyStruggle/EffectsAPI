@@ -112,13 +112,14 @@ public class EffectFactory {
             Map<String,Enum<?>> enumMap = new HashMap<>();
             if(enumConstants.length<50)for(Enum<?> e : enumConstants) enumMap.put(e.name().toUpperCase(),e);
             Object o = effect.getData().get(enumMap.get("TYPE"));
-            if(o instanceof Enum e) {
-                for(var key : e.getClass().getEnumConstants()) {
+            if(o instanceof Enum) {
+                Enum<?> e = (Enum<?>) o;
+                for(Enum<?> key : e.getClass().getEnumConstants()) {
                     Bukkit.getPluginManager().addPermission(new Permission(permissionPrefix + name + "." + key));
                 }
             }
             else if(o instanceof PotionEffectType) {
-                for(var key : PotionEffectType.values()) {
+                for(PotionEffectType key : PotionEffectType.values()) {
                     Bukkit.getPluginManager().addPermission(new Permission(permissionPrefix + name + "." + key));
                 }
             }

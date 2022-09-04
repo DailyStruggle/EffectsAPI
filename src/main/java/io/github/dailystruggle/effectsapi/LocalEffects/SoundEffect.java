@@ -28,27 +28,27 @@ public class SoundEffect extends Effect<SoundTypeNames> {
 
     @Override
     public void run() {
-        if (target instanceof Player player) {
+        if (target instanceof Player) {
             double dx=0, dy=0, dz=0;
             float volume=100, pitch=1000;
 
             Object o = data.get(SoundTypeNames.VOLUME);
-            if(o instanceof Number n) volume = n.floatValue()/100;
+            if(o instanceof Number) volume = ((Number) o).floatValue()/100;
 
             o = data.get(SoundTypeNames.PITCH);
-            if(o instanceof Number n) pitch = n.floatValue()/100;
+            if(o instanceof Number) pitch = ((Number) o).floatValue()/100;
 
             o = data.get(SoundTypeNames.DX);
-            if(o instanceof Number n) dx = n.floatValue();
+            if(o instanceof Number) dx = ((Number) o).floatValue();
 
             o = data.get(SoundTypeNames.DY);
-            if(o instanceof Number n) dy = n.floatValue();
+            if(o instanceof Number) dy = ((Number) o).floatValue();
 
             o = data.get(SoundTypeNames.DZ);
-            if(o instanceof Number n) dz = n.floatValue();
+            if(o instanceof Number) dz = ((Number) o).floatValue();
 
-            Location location = player.getLocation().add(dx,dy,dz);
-            player.playSound(location,
+            Location location = ((Player) target).getLocation().add(dx,dy,dz);
+            ((Player) target).playSound(location,
                     (Sound) data.get(SoundTypeNames.TYPE),
                     volume, pitch
             );

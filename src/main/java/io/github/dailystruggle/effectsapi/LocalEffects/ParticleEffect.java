@@ -26,7 +26,7 @@ public class ParticleEffect extends Effect<ParticleTypeNames> {
 
         int numParticles = 0;
         Object o = data.get(ParticleTypeNames.NUMBER);
-        if(o instanceof Number n) numParticles = n.intValue();
+        if(o instanceof Number) numParticles = ((Number) o).intValue();
 
         Objects.requireNonNull(location.getWorld()).spawnParticle(
                 (Particle) data.get(ParticleTypeNames.TYPE),

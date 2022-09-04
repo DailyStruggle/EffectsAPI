@@ -78,12 +78,12 @@ public class NoteEffect extends Effect<NoteTypeNames> {
     private final class MakeNoteSound extends BukkitRunnable {
         @Override
         public void run() {
-            if(target instanceof Entity entity) target = entity.getLocation();
+            if(target instanceof Entity) target = ((Entity) target).getLocation();
             Location location = ((Location) target);
 
             int tone = 0;
             Object o = data.get(NoteTypeNames.TONE);
-            if(o instanceof Number n) tone = n.intValue();
+            if(o instanceof Number) tone = ((Number) o).intValue();
 
             List<Player> players = Objects.requireNonNull(location.getWorld()).getPlayers()
                     .parallelStream().filter(player -> (player.getLocation().distance(location) < 48))

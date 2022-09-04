@@ -19,7 +19,7 @@ public class PotionEffect extends Effect<PotionTypeNames> {
     public PotionEffect() throws IllegalArgumentException {
         super(new EnumMap<>(PotionTypeNames.class));
         EnumMap<PotionTypeNames, Object> data = getData();
-        data.put(PotionTypeNames.TYPE, org.bukkit.FireworkEffect.Type.BALL);
+        data.put(PotionTypeNames.TYPE, PotionEffectType.BLINDNESS);
         data.put(PotionTypeNames.DURATION, 1);
         data.put(PotionTypeNames.AMPLIFIER, 1);
         data.put(PotionTypeNames.AMBIENT, false);
@@ -35,19 +35,19 @@ public class PotionEffect extends Effect<PotionTypeNames> {
         boolean amb=false, part=false, icon=false;
 
         Object o = data.get(PotionTypeNames.DURATION);
-        if(o instanceof Number n) duration = n.intValue();
+        if(o instanceof Number) duration = ((Number) o).intValue();
 
         o = data.get(PotionTypeNames.AMPLIFIER);
-        if(o instanceof Number n) amp = n.intValue();
+        if(o instanceof Number) amp = ((Number) o).intValue();
 
         o = data.get(PotionTypeNames.AMBIENT);
-        if(o instanceof Boolean b) amb = b;
+        if(o instanceof Boolean) amb = (Boolean) o;
 
         o = data.get(PotionTypeNames.PARTICLES);
-        if(o instanceof Boolean b) part = b;
+        if(o instanceof Boolean) part = (Boolean) o;
 
         o = data.get(PotionTypeNames.ICON);
-        if(o instanceof Boolean b) icon = b;
+        if(o instanceof Boolean) icon = (Boolean) o;
 
 
         org.bukkit.potion.PotionEffect potionEffect = new org.bukkit.potion.PotionEffect(
