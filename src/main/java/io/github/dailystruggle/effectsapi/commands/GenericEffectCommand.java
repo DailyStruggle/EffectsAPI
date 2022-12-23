@@ -4,6 +4,7 @@ import io.github.dailystruggle.commandsapi.bukkit.BukkitParameter;
 import io.github.dailystruggle.commandsapi.bukkit.LocalParameters.*;
 import io.github.dailystruggle.commandsapi.bukkit.localCommands.BukkitTreeCommand;
 import io.github.dailystruggle.effectsapi.Effect;
+import io.github.dailystruggle.effectsapi.EffectFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.plugin.Plugin;
@@ -22,13 +23,7 @@ public abstract class GenericEffectCommand<T extends Effect<?>> extends BukkitTr
         this.persistentClass = (Class<T>) ((ParameterizedType) getClass()
                 .getGenericSuperclass()).getActualTypeArguments()[0];
 
-        Effect<?> effect;
-        try {
-            effect = persistentClass.getConstructor().newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-            return;
-        }
+        Effect<?> effect = Objects.requireNonNull(EffectFactory.buildEffect(name()));
         for (Map.Entry<? extends Enum<?>, Object> entry : effect.getData().entrySet()) {
             Object val = entry.getValue();
 

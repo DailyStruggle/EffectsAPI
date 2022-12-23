@@ -6,7 +6,7 @@
 
     <groupId>io.github.dailystruggle</groupId>
     <artifactId>EffectsAPI</artifactId>
-    <version>1.0-ALPHA24</version>
+    <version>1.0-ALPHA32</version>
     <packaging>jar</packaging>
 
     <name>EffectsAPI</name>
@@ -215,7 +215,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.17.1-R0.1-SNAPSHOT</version>
+            <version>1.16.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -227,7 +227,7 @@
         <dependency>
             <groupId>io.github.dailystruggle</groupId>
             <artifactId>CommandsAPI</artifactId>
-            <version>1.0-ALPHA67</version>
+            <version>1.0-ALPHA75</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

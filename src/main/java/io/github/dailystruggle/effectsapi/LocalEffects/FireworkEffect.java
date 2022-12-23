@@ -1,9 +1,11 @@
 package io.github.dailystruggle.effectsapi.LocalEffects;
 
 import io.github.dailystruggle.effectsapi.Effect;
+import io.github.dailystruggle.effectsapi.EffectsAPI;
 import io.github.dailystruggle.effectsapi.LocalEffects.enums.FireworkTypeNames;
 import io.github.dailystruggle.effectsapi.LocalEffects.enums.PotionTypeNames;
 import io.github.dailystruggle.effectsapi.SpigotListeners.FireworkSafetyListener;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -37,6 +39,11 @@ public class FireworkEffect extends Effect<FireworkTypeNames> {
     @Override
     public void run() {
         if (target instanceof Entity) target = ((Entity) target).getLocation();
+        if(!Bukkit.isPrimaryThread()) {
+            Bukkit.getScheduler().runTask(EffectsAPI.fireworkSafetyListener.caller, this);
+            return;
+        }
+
         Location location = (Location) target;
 
         int numFireworks = 1;

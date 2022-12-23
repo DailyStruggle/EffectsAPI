@@ -48,7 +48,7 @@ public final class EffectsAPI extends JavaPlugin {
         return version;
     }
 
-    private static Integer getServerIntVersion() {
+    public static Integer getServerIntVersion() {
         if (intVersion == null) {
             String[] splitVersion = getServerVersion().split("_");
             if (splitVersion.length == 0) {

@@ -1,6 +1,7 @@
 package io.github.dailystruggle.effectsapi.LocalEffects;
 
 import io.github.dailystruggle.effectsapi.Effect;
+import io.github.dailystruggle.effectsapi.EffectsAPI;
 import io.github.dailystruggle.effectsapi.LocalEffects.enums.FireworkTypeNames;
 import io.github.dailystruggle.effectsapi.LocalEffects.enums.NoteTypeNames;
 import io.github.dailystruggle.effectsapi.LocalEffects.enums.ParticleTypeNames;
@@ -49,11 +50,12 @@ public class PotionEffect extends Effect<PotionTypeNames> {
         o = data.get(PotionTypeNames.ICON);
         if(o instanceof Boolean) icon = (Boolean) o;
 
+        PotionEffectType potionEffectType = (PotionEffectType) data.get(PotionTypeNames.TYPE);
+        if(potionEffectType == null) return;
 
-        org.bukkit.potion.PotionEffect potionEffect = new org.bukkit.potion.PotionEffect(
-                (PotionEffectType) data.get(PotionTypeNames.TYPE),
-                duration, amp, amb, part, icon
-        );
+        org.bukkit.potion.PotionEffect potionEffect = EffectsAPI.getServerIntVersion()>12
+                ? new org.bukkit.potion.PotionEffect(potionEffectType, duration, amp, amb, part, icon)
+                : new org.bukkit.potion.PotionEffect(potionEffectType, duration, amp, amb, part);
         if (target instanceof Player) {
             ((Player) target).addPotionEffect(potionEffect);
         } else {

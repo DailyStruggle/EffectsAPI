@@ -1,5 +1,6 @@
 package io.github.dailystruggle.effectsapi;
 
+import io.github.dailystruggle.commandsapi.common.CommandsAPI;
 import io.github.dailystruggle.effectsapi.LocalEffects.*;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
@@ -18,21 +19,22 @@ import java.util.stream.Collectors;
 public class EffectFactory {
     //map name to effect type
     //  this is a runtime solution for effectively a switch statement, to allow addition and removal
-    private static final ConcurrentHashMap<String, Class<? extends Effect<?>>> effectMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Effect<?>> effectMap = new ConcurrentHashMap<>();
     // recall list of permissions added for removal on removeEffect
     // key: effect name
     // val: permission names
     private final static ConcurrentHashMap<String, List<String>> initializedPermissions = new ConcurrentHashMap<>();
 
     static {
-        addEffect("FIREWORK", FireworkEffect.class);
-        addEffect("NOTE", NoteEffect.class);
-        addEffect("PARTICLE", ParticleEffect.class);
-        addEffect("POTION", PotionEffect.class);
-        addEffect("SOUND", SoundEffect.class);
+        addEffect("FIREWORK", new FireworkEffect());
+        if(EffectsAPI.getServerIntVersion() > 16) addEffect("NOTE", new NoteEffect());
+        else addEffect("NOTE",new NoteEffect_1_12());
+        addEffect("PARTICLE", new ParticleEffect());
+        addEffect("POTION", new PotionEffect());
+        addEffect("SOUND", new SoundEffect());
     }
 
-    public static void addEffect(String effectName, Class<? extends Effect<?>> effect) {
+    public static void addEffect(String effectName, Effect<?> effect) {
         effectMap.putIfAbsent(effectName.toUpperCase(), effect);
     }
 
@@ -48,10 +50,10 @@ public class EffectFactory {
     public static <T extends Enum<T>> Effect<T> buildEffect(String name) {
         Effect<T> effect;
         try {
-            effect = (Effect<T>) effectMap.get(name.toUpperCase()).getConstructor().newInstance();
-        } catch (InstantiationException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            effect = (Effect<T>) effectMap.get(name.toUpperCase()).clone();
+        } catch (Throwable throwable) {
             //todo: figure out how these are triggered and log how to fix them
-            e.printStackTrace();
+            throwable.printStackTrace();
             return null;
         }
         return effect;
@@ -77,7 +79,7 @@ public class EffectFactory {
      * @param permissions      - set of permissions, typically from player.getEffectivePermissions()
      * @return all effects constructed
      */
-    public static List<Effect<?>> buildEffects(@NotNull String permissionPrefix, @NotNull Collection<PermissionAttachmentInfo> permissions) {
+    public static List<Effect<?>> buildEffects(@NotNull String permissionPrefix, @NotNull final Collection<PermissionAttachmentInfo> permissions) {
         List<Effect<?>> res = new ArrayList<>();
         if (!permissionPrefix.endsWith(".")) permissionPrefix += ".";
 
@@ -89,12 +91,7 @@ public class EffectFactory {
             String[] val = node.replace(permissionPrefix, "").split("\\.");
 
             Effect<?> effect;
-            try {
-                effect = effectMap.get(val[0].toUpperCase()).getConstructor().newInstance();
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                e.printStackTrace();
-                continue;
-            }
+            effect = effectMap.get(val[0].toUpperCase()).clone();
             //todo: convert parameters to data
 
             if(val.length>1) effect.setData(Arrays.copyOfRange(val,1,val.length));

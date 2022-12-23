@@ -25,14 +25,14 @@ public class FireworkSafetyListener implements Listener {
     //    - I do not want to interfere with other FireworkTypeNames of damage.
     //  static because can be common between instances and should be accessible from FireworkEffect
     private static final ConcurrentSkipListSet<Integer> safeEntities = new ConcurrentSkipListSet<>();
-    private final Plugin caller;
+    public final Plugin caller;
 
     public FireworkSafetyListener(Plugin caller) {
         this.caller = caller;
     }
 
     public static void addFirework(Integer fireworkId, Integer numExplosions, Boolean isSafe) {
-        FireworkDetonation res = fireworkDetonations.put(fireworkId, new FireworkDetonation(fireworkId, numExplosions, isSafe));
+        fireworkDetonations.put(fireworkId, new FireworkDetonation(fireworkId, numExplosions, isSafe));
     }
 
     //multiply explosions rather than fireworks, for fewer moving parts
