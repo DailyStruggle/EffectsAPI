@@ -16,7 +16,7 @@ public class SoundEffect extends Effect<SoundTypeNames> {
     public SoundEffect() throws IllegalArgumentException {
         super(new EnumMap<>(SoundTypeNames.class));
         EnumMap<SoundTypeNames, Object> data = getData();
-        data.put(SoundTypeNames.TYPE, Sound.ENTITY_GENERIC_EXPLODE);
+        data.put(SoundTypeNames.TYPE, Sound.values()[0]);
         data.put(SoundTypeNames.VOLUME, 100);
         data.put(SoundTypeNames.PITCH, 100);
         data.put(SoundTypeNames.DX, 0.0);

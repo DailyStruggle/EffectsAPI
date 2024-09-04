@@ -6,7 +6,7 @@
 
     <groupId>io.github.dailystruggle</groupId>
     <artifactId>EffectsAPI</artifactId>
-    <version>1.0-ALPHA32</version>
+    <version>1.0.0-RELEASE</version>
     <packaging>jar</packaging>
 
     <name>EffectsAPI</name>
@@ -41,17 +41,6 @@
         <url>https://svn.apache.org/viewvc/maven</url>
     </scm>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
-
     <pluginRepositories>
         <pluginRepository>
             <releases>
@@ -73,9 +62,20 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.5.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitUntil>published</waitUntil>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -87,12 +87,25 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <javadocExecutable>${java.home}/../bin</javadocExecutable>
-                    <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
-                <version>2.9.1</version>
+                <version>3.10.0</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -103,39 +116,9 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
+                <version>3.2.5</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -143,13 +126,27 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
+                        <configuration>
+                            <!--suppress UnresolvedMavenProperty -->
+                            <keyname>${gpg.keyname}</keyname>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.8.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.7.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.0</version> <!-- Make sure to always use the latest version (https://maven.apache.org/plugins/maven-shade-plugin/) -->
+                <version>3.6.0</version> <!-- Make sure to always use the latest version (https://maven.apache.org/plugins/maven-shade-plugin/) -->
                 <configuration>
                     <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
                     <relocations>
@@ -158,19 +155,31 @@
                             <shadedPattern>io.github.dailystruggle.effectsapi.bstats</shadedPattern>
                         </relocation>
                         <relocation>
-                            <pattern>io.papermc.lib</pattern>
-                            <shadedPattern>io.github.dailystruggle.effectsapi.paperlib</shadedPattern> <!-- Replace this -->
-                        </relocation>
-                        <relocation>
                             <pattern>io.github.dailystruggle.commandsapi</pattern>
                             <shadedPattern>io.github.dailystruggle.effectsapi.commandsapi</shadedPattern> <!-- Replace this -->
                         </relocation>
                     </relocations>
                     <filters>
                         <filter>
-                            <artifact>io.papermc:*</artifact>
+                            <artifact>io.github.dailystruggle:*</artifact>
                             <excludes>
-                                <exclude>META-INF/*.MF</exclude>
+                                <exclude>org.jetbrains*</exclude>
+                                <exclude>plugin.yml</exclude>
+                                <exclude>*.yml</exclude>
+                                <exclude>*.xml</exclude>
+                                <exclude>*.properties</exclude>
+                                <exclude>org.yaml.snakeyaml.*</exclude>
+                                <exclude>META-INF.*</exclude>
+                                <exclude>META-INF/*</exclude>
+                                <exclude>META-INF/**/*</exclude>
+                                <exclude>META-INF/versions/16/</exclude>
+                                <exclude>META-INF/MANIFEST.MF</exclude>
+                            </excludes>
+                        </filter>
+                        <filter>
+                            <artifact>org.jetbrains:*</artifact>
+                            <excludes>
+                                <exclude>*</exclude>
                             </excludes>
                         </filter>
                     </filters>
@@ -219,22 +228,16 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.9.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>io.github.dailystruggle</groupId>
             <artifactId>CommandsAPI</artifactId>
-            <version>1.0-ALPHA75</version>
+            <version>1.0.0-RELEASE</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>23.0.0</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

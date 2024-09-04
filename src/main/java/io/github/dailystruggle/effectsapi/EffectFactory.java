@@ -29,7 +29,7 @@ public class EffectFactory {
         addEffect("FIREWORK", new FireworkEffect());
         if(EffectsAPI.getServerIntVersion() > 16) addEffect("NOTE", new NoteEffect());
         else addEffect("NOTE",new NoteEffect_1_12());
-        addEffect("PARTICLE", new ParticleEffect());
+        if(EffectsAPI.getServerIntVersion()>8) addEffect("PARTICLE", new ParticleEffect());
         addEffect("POTION", new PotionEffect());
         addEffect("SOUND", new SoundEffect());
     }
@@ -60,6 +60,7 @@ public class EffectFactory {
     }
 
     /**
+     * @param <T> type of effect to build
      * @param name name of effect to build
      * @param data what data the effect should have
      * @return a newly constructed effect, or null if there's no effect by that name
@@ -102,8 +103,10 @@ public class EffectFactory {
     }
 
     public static void addPermissions(String permissionPrefix) {
+        if(permissionPrefix == null || permissionPrefix.isEmpty()) return;
         if(!permissionPrefix.endsWith(".")) permissionPrefix = permissionPrefix + ".";
         for(String name : effectMap.keySet()) {
+            if(name == null) continue;
             Effect<?> effect = EffectFactory.buildEffect(name);
             Enum<?>[] enumConstants = Objects.requireNonNull(effect).persistentClass.getEnumConstants();
             Map<String,Enum<?>> enumMap = new HashMap<>();
@@ -112,11 +115,13 @@ public class EffectFactory {
             if(o instanceof Enum) {
                 Enum<?> e = (Enum<?>) o;
                 for(Enum<?> key : e.getClass().getEnumConstants()) {
+                    if(key == null) continue;
                     Bukkit.getPluginManager().addPermission(new Permission(permissionPrefix + name + "." + key));
                 }
             }
             else if(o instanceof PotionEffectType) {
                 for(PotionEffectType key : PotionEffectType.values()) {
+                    if(key == null) continue;
                     Bukkit.getPluginManager().addPermission(new Permission(permissionPrefix + name + "." + key));
                 }
             }

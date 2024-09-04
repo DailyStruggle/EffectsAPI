@@ -2,6 +2,7 @@ package io.github.dailystruggle.effectsapi.commands;
 
 import io.github.dailystruggle.commandsapi.bukkit.localCommands.BukkitTreeCommand;
 import io.github.dailystruggle.commandsapi.common.CommandsAPICommand;
+import io.github.dailystruggle.effectsapi.EffectsAPI;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
@@ -14,7 +15,7 @@ public class TestCommand extends BukkitTreeCommand {
         super(plugin, parent);
         addSubCommand(new FireworkCommand(plugin));
         addSubCommand(new NoteCommand(plugin));
-        addSubCommand(new ParticleCommand(plugin));
+        if(EffectsAPI.getServerIntVersion()>8) addSubCommand(new ParticleCommand(plugin));
         addSubCommand(new PotionCommand(plugin));
         addSubCommand(new SoundCommand(plugin));
     }

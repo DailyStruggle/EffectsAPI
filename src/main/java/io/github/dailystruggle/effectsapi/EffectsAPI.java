@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 //reference point for
 public final class EffectsAPI extends JavaPlugin {
@@ -39,24 +41,48 @@ public final class EffectsAPI extends JavaPlugin {
         return instance;
     }
 
+    private static final Pattern versionPattern = Pattern.compile( "[-+^.a-zA-Z]*",Pattern.CASE_INSENSITIVE );
     private static String getServerVersion() {
-        if (version == null) {
-            version = Bukkit.getServer().getClass().getPackage().getName();
-            version = version.replaceAll("[-+^.a-zA-Z]*", "");
+        if ( version == null ) {
+            version = EffectsAPI.getInstance().getServer().getClass().getPackage().getName();
+            if(!version.contains("1_")) {
+                String bukkitVersion = EffectsAPI.getInstance().getServer().getBukkitVersion();
+
+                int end = bukkitVersion.indexOf("-R");
+                if(end < 0) return "1_13_2";
+
+                bukkitVersion = bukkitVersion.substring(0,end).replaceAll("\\.","_");
+                return bukkitVersion;
+            }
+            else version = versionPattern.matcher( version ).replaceAll( "" );
         }
 
         return version;
     }
 
     public static Integer getServerIntVersion() {
-        if (intVersion == null) {
-            String[] splitVersion = getServerVersion().split("_");
-            if (splitVersion.length == 0) {
-                intVersion = 0;
-            } else if (splitVersion.length == 1) {
-                intVersion = Integer.valueOf(splitVersion[0]);
+        if ( intVersion == null ) {
+            String[] splitVersion = getServerVersion().split( "_" );
+            if ( splitVersion.length == 0 ) {
+                intVersion = 1;
+            } else if ( splitVersion.length == 1 ) {
+                try {
+                    intVersion = Integer.valueOf( splitVersion[0] );
+                } catch (NumberFormatException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, "expected number, received - " + splitVersion[0]);
+                    Bukkit.getLogger().log(Level.SEVERE, "full string - " + getServerVersion());
+                    e.printStackTrace();
+                    intVersion = 1;
+                }
             } else {
-                intVersion = Integer.valueOf(splitVersion[1]);
+                try {
+                    intVersion = Integer.valueOf( splitVersion[1] );
+                } catch (NumberFormatException e) {
+                    Bukkit.getLogger().log(Level.SEVERE, "expected number, received - " + splitVersion[1]);
+                    Bukkit.getLogger().log(Level.SEVERE, "full string - " + getServerVersion());
+                    e.printStackTrace();
+                    intVersion = 1;
+                }
             }
         }
         return intVersion;
