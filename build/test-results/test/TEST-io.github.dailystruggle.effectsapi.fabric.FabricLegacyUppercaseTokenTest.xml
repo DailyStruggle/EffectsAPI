@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.dailystruggle.effectsapi.fabric.FabricLegacyUppercaseTokenTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-06-11T02:21:26.471Z" hostname="JOHN" time="8.526">
+  <properties/>
+  <testcase name="coercer_acceptsUppercaseParticleToken()" classname="io.github.dailystruggle.effectsapi.fabric.FabricLegacyUppercaseTokenTest" time="0.011"/>
+  <testcase name="potionEffect_setDataAcceptsUppercaseLegacyToken()" classname="io.github.dailystruggle.effectsapi.fabric.FabricLegacyUppercaseTokenTest" time="0.005"/>
+  <testcase name="particleEffect_setDataAcceptsUppercaseLegacyToken()" classname="io.github.dailystruggle.effectsapi.fabric.FabricLegacyUppercaseTokenTest" time="0.006"/>
+  <testcase name="coercer_acceptsLegacyEnumStyleSoundToken()" classname="io.github.dailystruggle.effectsapi.fabric.FabricLegacyUppercaseTokenTest" time="0.001"/>
+  <testcase name="coercer_acceptsUppercasePotionToken()" classname="io.github.dailystruggle.effectsapi.fabric.FabricLegacyUppercaseTokenTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

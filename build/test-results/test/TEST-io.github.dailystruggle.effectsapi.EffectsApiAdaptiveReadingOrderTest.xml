@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.dailystruggle.effectsapi.EffectsApiAdaptiveReadingOrderTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-06-11T02:21:24.333Z" hostname="JOHN" time="0.248">
+  <properties/>
+  <testcase name="SoundEffect: numeric tokens skip the Sound-typed first key and fill the int+float keys" classname="io.github.dailystruggle.effectsapi.EffectsApiAdaptiveReadingOrderTest" time="0.224"/>
+  <testcase name="PotionEffect: type mismatch on TYPE skips to DURATION without losing the rest" classname="io.github.dailystruggle.effectsapi.EffectsApiAdaptiveReadingOrderTest" time="0.009"/>
+  <testcase name="Cursor never rewinds: once a later key is assigned, earlier keys stay at default" classname="io.github.dailystruggle.effectsapi.EffectsApiAdaptiveReadingOrderTest" time="0.009"/>
+  <testcase name="PotionEffect: a token that no remaining key accepts is reported once via the warn sink" classname="io.github.dailystruggle.effectsapi.EffectsApiAdaptiveReadingOrderTest" time="0.002"/>
+  <testcase name="SoundEffect: a leading float token leapfrogs Sound + Integer slots to land on the first Double key" classname="io.github.dailystruggle.effectsapi.EffectsApiAdaptiveReadingOrderTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

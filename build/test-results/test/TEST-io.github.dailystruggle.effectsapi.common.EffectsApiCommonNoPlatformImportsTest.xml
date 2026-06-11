@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.dailystruggle.effectsapi.common.EffectsApiCommonNoPlatformImportsTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-06-11T02:21:26.457Z" hostname="JOHN" time="0.01">
+  <properties/>
+  <testcase name="commonPackageHasNoPlatformImports()" classname="io.github.dailystruggle.effectsapi.common.EffectsApiCommonNoPlatformImportsTest" time="0.009"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

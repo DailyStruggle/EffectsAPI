@@ -1,0 +1,81 @@
+// effects-api-ADR-003 — In-module platform split.
+//
+// This module hosts three sibling subpackages in a single Gradle module
+// (mirrors the commands-api precedent of common/ + bukkit/ + brigadier/):
+//   - effectsapi/common  : platform-neutral SPI + base types
+//   - effectsapi/bukkit  : Bukkit-backed runtime + concrete effects
+//   - effectsapi/fabric  : Fabric-backed runtime + concrete effects
+//
+// Both platforms are declared compileOnly / modCompileOnly so neither leaks
+// into the runtime classpath of the wrong adapter. Loom is required so the
+// fabric/ subpackage can resolve net.minecraft.* at compile time. This is
+// the same single-module mixed-platform precedent already used by
+// :rtp-plugin (see rtp-plugin/build.gradle Phase-1 comment block).
+//
+// Loom allow-list amendment landed in lockstep with effects-api-ADR-003:
+//   - rtp-fabric-ADR-002 §4 Build Discipline (now lists effects-api).
+//   - rtp-fabric/REQUIREMENTS.md REQ-FABRIC-ARCH-003 (now lists
+//     effects-api and remap scope io/github/dailystruggle/effectsapi/fabric/**).
+plugins {
+    id 'java-library'
+    id 'fabric-loom' version '1.15-SNAPSHOT' apply false
+    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT' apply false
+}
+
+apply plugin: 'java-library'
+apply plugin: 'fabric-loom'
+
+group = 'io.github.dailystruggle'
+version = '3.1.2'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url = 'https://repo.papermc.io/repository/maven-public/' }
+    maven { url = 'https://repo.papermc.io/repository/maven-snapshots/' }
+    maven { url = 'https://jitpack.io' }
+    maven { url = 'https://maven.fabricmc.net/' }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    withJavadocJar()
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+ext {
+    minecraftVersion = '1.21.1'
+    loaderVersion    = '0.16.5'
+    fabricApiVersion = '0.115.0+1.21.1'
+}
+
+dependencies {
+    compileOnly 'org.jetbrains:annotations:24.1.0'
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core:5.5.0'
+    testImplementation 'org.jetbrains:annotations:24.1.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    compileOnly 'org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT'
+    testImplementation 'org.spigotmc:spigot-api:1.20.1-R0.1-SNAPSHOT'
+
+    minecraft "com.mojang:minecraft:${minecraftVersion}"
+    mappings  loom.officialMojangMappings()
+    modCompileOnly "net.fabricmc:fabric-loader:${loaderVersion}"
+    modCompileOnly "net.fabricmc.fabric-api:fabric-api:${fabricApiVersion}"
+
+    implementation 'io.github.dailystruggle:commands-api:3.1.2'
+    implementation 'io.github.dailystruggle:rtp-api:3.1.2'
+}
+
+test {
+    useJUnitPlatform()
+}

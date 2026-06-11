@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="effects-api-ADR-006 — fabric/fabric_unobf carriers are mutually disjoint" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-06-11T02:21:24.278Z" hostname="JOHN" time="0.052">
+  <properties/>
+  <testcase name="effectsapi.fabric_unobf.* sources do not import effectsapi.fabric.*" classname="io.github.dailystruggle.effectsapi.fabric.EffectsApiFabricCarriersDisjointTest" time="0.028"/>
+  <testcase name="effectsapi.fabric.* sources do not import effectsapi.fabric_unobf.*" classname="io.github.dailystruggle.effectsapi.fabric.EffectsApiFabricCarriersDisjointTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

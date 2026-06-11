@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-06-11T02:21:34.999Z" hostname="JOHN" time="0.031">
+  <properties/>
+  <testcase name="runtime_particleDispatcher_registerGetUnregister()" classname="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" time="0.005"/>
+  <testcase name="runtime_lenientModeDropsTaskWhenNoServerBound()" classname="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" time="0.003"/>
+  <testcase name="soundEffect_setDataAcceptsCoercedSoundToken()" classname="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" time="0.004"/>
+  <testcase name="soundEffect_defaultsArePopulated()" classname="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" time="0.0"/>
+  <testcase name="runtime_soundDispatcher_registerGetUnregister()" classname="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" time="0.002"/>
+  <testcase name="valueCoercer_resolvesBareSoundName()" classname="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" time="0.0"/>
+  <testcase name="soundEffect_runWithoutTargetIsNoOp()" classname="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" time="0.001"/>
+  <testcase name="valueCoercer_unknownSoundThrows()" classname="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" time="0.007"/>
+  <testcase name="valueCoercer_resolvesNamespacedSound()" classname="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" time="0.001"/>
+  <testcase name="runtime_strictModeThrowsWhenNoServerBound()" classname="io.github.dailystruggle.effectsapi.fabric.FabricSoundEffectSmokeTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

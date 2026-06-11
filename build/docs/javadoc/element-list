@@ -1,0 +1,16 @@
+io.github.dailystruggle.effectsapi
+io.github.dailystruggle.effectsapi.bukkit
+io.github.dailystruggle.effectsapi.bukkit.BukkitListeners
+io.github.dailystruggle.effectsapi.bukkit.commands
+io.github.dailystruggle.effectsapi.bukkit.events
+io.github.dailystruggle.effectsapi.bukkit.LocalEffects
+io.github.dailystruggle.effectsapi.bukkit.LocalEffects.enums
+io.github.dailystruggle.effectsapi.commands
+io.github.dailystruggle.effectsapi.common
+io.github.dailystruggle.effectsapi.common.spi
+io.github.dailystruggle.effectsapi.fabric
+io.github.dailystruggle.effectsapi.fabric.LocalEffects
+io.github.dailystruggle.effectsapi.fabric.LocalEffects.enums
+io.github.dailystruggle.effectsapi.LocalEffects
+io.github.dailystruggle.effectsapi.LocalEffects.enums
+io.github.dailystruggle.effectsapi.SpigotListeners

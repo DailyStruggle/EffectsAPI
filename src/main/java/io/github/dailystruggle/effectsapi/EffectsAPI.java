@@ -1,52 +1,73 @@
 package io.github.dailystruggle.effectsapi;
 
-import io.github.dailystruggle.commandsapi.bukkit.localCommands.BukkitTreeCommand;
-import io.github.dailystruggle.commandsapi.common.CommandsAPI;
-import io.github.dailystruggle.effectsapi.SpigotListeners.FireworkSafetyListener;
-import io.github.dailystruggle.effectsapi.commands.EffectsAPIMainCommand;
+import io.github.dailystruggle.effectsapi.bukkit.BukkitListeners.FireworkSafetyListener;
+import io.github.dailystruggle.effectsapi.bukkit.BukkitListeners.GlideSafetyListener;
 import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 //reference point for
-public final class EffectsAPI extends JavaPlugin {
-    public static EffectsAPI instance = null;
+public final class EffectsAPI {
+    public static Plugin instance = null;
     //referentiable listener, for updating
     public static FireworkSafetyListener fireworkSafetyListener = null;
+    public static GlideSafetyListener glideSafetyListener = null;
     //server version checking
     private static String version = null;
     private static Integer intVersion = null;
-    public EffectsAPI() {
 
-    }
+    private EffectsAPI() {
 
-    public EffectsAPI(Plugin caller) {
-        init(caller);
     }
 
     /**
-     * @return instance of plugin if loaded, otherwise null
+     * @return instance of plugin set via {@link #init(Plugin)}; never null.
+     * @throws IllegalStateException if {@link #init(Plugin)} has not been called yet (S-006).
      */
-    @Nullable
-    public static EffectsAPI getInstance() {
+    @NotNull
+    public static Plugin getInstance() {
+        Plugin local = instance;
+        if (local == null) {
+            throw new IllegalStateException(
+                    "EffectsAPI.getInstance() called before EffectsAPI.init(Plugin)");
+        }
+        return local;
+    }
+
+    /**
+     * Self-populating variant of {@link #getInstance()}. If {@link #init(Plugin)}
+     * has not been called yet, the supplied {@code fallback} is used to
+     * initialize the API (idempotent) and is then returned. Lets in-repo
+     * callers that already hold a {@link Plugin} reference (e.g. the RTP
+     * plugin instance) avoid the {@link IllegalStateException} thrown by the
+     * no-arg overload during early lifecycle windows, without {@code effects-api}
+     * having to take a hard dependency on RTP.
+     *
+     * @param fallback plugin to initialize with if {@code instance} is unset; may be {@code null}
+     * @return the resolved {@link Plugin} instance
+     * @throws IllegalStateException if {@code instance} is unset and {@code fallback} is {@code null}
+     */
+    @NotNull
+    public static Plugin getInstance(Plugin fallback) {
+        Plugin local = instance;
+        if (local != null) return local;
+        if (fallback == null) {
+            throw new IllegalStateException(
+                    "EffectsAPI.getInstance(fallback) called before init(Plugin) with null fallback");
+        }
+        init(fallback);
         return instance;
     }
 
     private static final Pattern versionPattern = Pattern.compile( "[-+^.a-zA-Z]*",Pattern.CASE_INSENSITIVE );
     private static String getServerVersion() {
         if ( version == null ) {
-            version = EffectsAPI.getInstance().getServer().getClass().getPackage().getName();
+            version = Bukkit.getServer().getClass().getPackage().getName();
             if(!version.contains("1_")) {
-                String bukkitVersion = EffectsAPI.getInstance().getServer().getBukkitVersion();
+                String bukkitVersion = Bukkit.getServer().getBukkitVersion();
 
                 int end = bukkitVersion.indexOf("-R");
                 if(end < 0) return "1_13_2";
@@ -90,33 +111,37 @@ public final class EffectsAPI extends JavaPlugin {
 
     public static void init(Plugin caller) {
         // Plugin startup logic, in case of standalone usage
+        if (instance == null) {
+            instance = caller;
+        }
         if (fireworkSafetyListener == null) {
             //on first initialization, register firework safety events
             fireworkSafetyListener = new FireworkSafetyListener(caller);
             Bukkit.getPluginManager().registerEvents(fireworkSafetyListener, caller);
         }
-
-        //construct commands
+        if (glideSafetyListener == null) {
+            // GlideEffect (effects-api-ADR-001): tracks gliders, suppresses
+            // firework rockets when configured, and places players on
+            // shutdown via placeAllOnShutdown().
+            glideSafetyListener = new GlideSafetyListener(caller);
+            Bukkit.getPluginManager().registerEvents(glideSafetyListener, caller);
+        }
     }
 
-    @Override
-    public void onEnable() {
-        init(this);
-
-        //set up testCommand
-        BukkitTreeCommand mainCommand = new EffectsAPIMainCommand(this);
-        PluginCommand command = Objects.requireNonNull(getCommand("effectsapi"));
-        command.setExecutor(mainCommand);
-        command.setTabCompleter(mainCommand);
-
-        Bukkit.getScheduler().runTaskTimer(this,() -> CommandsAPI.execute(Long.MAX_VALUE),20,1);
-
-        //todo: set up command and tabcompleter
-    }
-
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
-        instance = null;
+    /**
+     * Plugin-disable hook. Caller is expected to invoke this from its
+     * {@code onDisable()} so still-gliding players can be placed at the
+     * highest safe block below them (or on a synthesized platform) before
+     * the server stops. Idempotent.
+     */
+    public static void disable() {
+        if (glideSafetyListener != null) {
+            try {
+                glideSafetyListener.placeAllOnShutdown();
+            } catch (Throwable t) {
+                Bukkit.getLogger().log(Level.WARNING,
+                        "EffectsAPI.disable: GlideEffect shutdown placement threw", t);
+            }
+        }
     }
 }
